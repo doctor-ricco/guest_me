@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "803912439349",
+    "project_id": "guestme-6db6c",
+    "storage_bucket": "guestme-6db6c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:803912439349:android:c3466081b286cb1523037c",
+        "android_client_info": {
+          "package_name": "com.example.guestme"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDXZmzmUz46R_imqvWAgncCSyj01Y8QquY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
