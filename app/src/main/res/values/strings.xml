@@ -1,3 +1,11 @@
 <resources>
-    <string name="app_name">Guest Me - Visitor</string>
+    <string name="app_name">Guest Me App</string>
+    <string-array name="user_types">
+        <item>Host</item>
+        <item>Visitor</item>
+    </string-array>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
+
+

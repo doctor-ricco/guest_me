@@ -5,8 +5,11 @@ import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
+
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -27,9 +30,34 @@ public class LoginActivity extends AppCompatActivity {
                 FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password)
                         .addOnCompleteListener(task -> {
                             if (task.isSuccessful()) {
-                                Toast.makeText(this, "Login bem-sucedido!", Toast.LENGTH_SHORT).show();
-                                startActivity(new Intent(this, MainActivity.class));
-                                finish();
+                                // Obter o UID do usuário autenticado
+                                String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+                                // Ler o tipo de usuário no Firestore
+                                FirebaseFirestore.getInstance().collection("users")
+                                        .document(userId)
+                                        .get()
+                                        .addOnSuccessListener(document -> {
+                                            if (document.exists()) {
+                                                String userType = document.getString("type");
+
+                                                // Redirecionar com base no tipo de usuário
+                                                if ("Host".equals(userType)) {
+                                                    Intent intent = new Intent(LoginActivity.this, HostActivity.class);
+                                                    startActivity(intent);
+                                                    finish();
+                                                } else if ("Visitor".equals(userType)) {
+                                                    Intent intent = new Intent(LoginActivity.this, VisitorActivity.class);
+                                                    startActivity(intent);
+                                                    finish();
+                                                } else {
+                                                    Toast.makeText(LoginActivity.this, "Tipo de usuário desconhecido.", Toast.LENGTH_SHORT).show();
+                                                }
+                                            } else {
+                                                Toast.makeText(LoginActivity.this, "Usuário não encontrado no Firestore.", Toast.LENGTH_SHORT).show();
+                                            }
+                                        })
+                                        .addOnFailureListener(e -> Toast.makeText(LoginActivity.this, "Erro ao buscar dados: " + e.getMessage(), Toast.LENGTH_SHORT).show());
                             } else {
                                 Toast.makeText(this, "Erro: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                             }
@@ -39,12 +67,10 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
-
         Button registerButton = findViewById(R.id.registerButton);
         registerButton.setOnClickListener(view -> {
             Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
             startActivity(intent);
         });
-
     }
 }
