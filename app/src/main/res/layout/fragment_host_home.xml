@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".HostHomeFragment">
+    android:layout_height="match_parent">
 
     <ScrollView
         android:layout_width="match_parent"
@@ -15,55 +13,53 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <!-- Mensagem de Boas-Vindas -->
+            <!-- Título -->
             <TextView
-                android:id="@+id/welcomeMessage"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Bem-vindo(a), [Nome do Host]!"
+                android:text="Complete Your Profile"
                 android:textSize="18sp"
                 android:textStyle="bold"
                 android:gravity="center"
                 android:padding="16dp" />
 
-            <!-- Botão Completar Perfil -->
-            <Button
-                android:id="@+id/completeProfileButton"
+            <!-- Full Name -->
+            <EditText
+                android:id="@+id/fullNameInput"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Completar Perfil"
+                android:hint="Full Name" />
+
+            <!-- Address -->
+            <EditText
+                android:id="@+id/addressInput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Address (Street, City, Country)" />
+
+            <!-- Phone Number -->
+            <EditText
+                android:id="@+id/phoneInput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Phone Number (+Country Code)"
+                android:inputType="phone" />
+
+            <!-- Upload Photo -->
+            <Button
+                android:id="@+id/uploadPhotoButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Upload Photo"
                 android:layout_marginTop="16dp" />
 
-            <!-- Preferências -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Preferências de Atividades:"
-                android:textSize="16sp"
-                android:layout_marginTop="24dp" />
-
-            <CheckBox
-                android:id="@+id/preferenceCuisine"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Culinária" />
-
-            <CheckBox
-                android:id="@+id/preferenceHistory"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="História" />
-
-            <!-- Botão para salvar preferências -->
+            <!-- Save and Continue Button -->
             <Button
-                android:id="@+id/savePreferencesButton"
+                android:id="@+id/saveProfileButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Salvar Preferências"
-                android:layout_marginTop="16dp" />
+                android:layout_marginTop="16dp"
+                android:text="Save and Continue" />
         </LinearLayout>
     </ScrollView>
-
-
-
 </FrameLayout>

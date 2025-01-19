@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/hostHomeFragment">
+
+    <!-- Fragmento Host Home -->
+    <fragment
+        android:id="@+id/hostHomeFragment"
+        android:name="com.example.guestme.HostHomeFragment"
+        android:label="Host Home"
+        tools:layout="@layout/fragment_host_home">
+
+        <!-- Ação para PreferencesFragment -->
+        <action
+            android:id="@+id/action_hostHomeFragment_to_preferencesFragment"
+            app:destination="@id/preferencesFragment" />
+    </fragment>
+
+    <!-- Fragmento Preferences -->
+    <fragment
+        android:id="@+id/preferencesFragment"
+        android:name="com.example.guestme.PreferencesFragment"
+        android:label="Preferences"
+        tools:layout="@layout/fragment_preferences" />
+</navigation>
