@@ -54,12 +54,14 @@
                 android:layout_marginTop="16dp" />
 
             <!-- Save and Continue Button -->
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/saveProfileButton"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="Save and Continue" />
+                android:text="Salvar Perfil" />
+
+
+
         </LinearLayout>
     </ScrollView>
 </FrameLayout>

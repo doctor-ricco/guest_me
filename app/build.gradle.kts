@@ -52,6 +52,10 @@ dependencies {
     implementation("androidx.navigation:navigation-ui-ktx:2.7.1")
     implementation("androidx.appcompat:appcompat:1.7.0-alpha03")
     implementation("com.google.android.material:material:1.9.0")
+    implementation("com.squareup.okhttp3:okhttp:4.10.0")
+    implementation("org.json:json:20230227")
+
+
 
 
 

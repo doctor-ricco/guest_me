@@ -16,7 +16,19 @@
         <action
             android:id="@+id/action_hostHomeFragment_to_preferencesFragment"
             app:destination="@id/preferencesFragment" />
+
+        <!-- Ação para WelcomeFragment -->
+        <action
+            android:id="@+id/action_hostHomeFragment_to_welcomeFragment"
+            app:destination="@id/welcomeFragment" />
     </fragment>
+
+    <!-- Fragmento Welcome -->
+    <fragment
+        android:id="@+id/welcomeFragment"
+        android:name="com.example.guestme.WelcomeFragment"
+        android:label="Welcome"
+        tools:layout="@layout/fragment_welcome" />
 
     <!-- Fragmento Preferences -->
     <fragment
