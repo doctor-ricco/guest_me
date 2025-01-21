@@ -106,10 +106,22 @@ public class HostHomeFragment extends Fragment {
                     .document(userId)
                     .update(userProfile)
                     .addOnSuccessListener(aVoid -> {
+                        Log.d("HostHomeFragment", "Profile saved successfully!");
                         Toast.makeText(getActivity(), "Profile saved successfully!", Toast.LENGTH_SHORT).show();
-                        Navigation.findNavController(view).navigate(R.id.action_hostHomeFragment_to_preferencesFragment);
+                        try {
+                            if (getActivity() != null && isAdded()) {
+                                Navigation.findNavController(view).navigate(R.id.action_hostHomeFragment_to_preferencesFragment);
+                            } else {
+                                Log.e("HostHomeFragment", "Navigation failed: Activity or Fragment not valid");
+                            }
+                        } catch (Exception e) {
+                            Log.e("HostHomeFragment", "Navigation Exception: " + e.getMessage(), e);
+                        }
                     })
-                    .addOnFailureListener(e -> Toast.makeText(getActivity(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                    .addOnFailureListener(e -> {
+                        Log.e("HostHomeFragment", "Error saving profile: " + e.getMessage(), e);
+                        Toast.makeText(getActivity(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    });
         });
 
         return view;

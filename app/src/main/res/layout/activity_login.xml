@@ -6,6 +6,7 @@
     android:layout_height="match_parent"
     android:padding="16dp">
 
+    <!-- Campo de email -->
     <EditText
         android:id="@+id/emailInput"
         android:layout_width="0dp"
@@ -16,6 +17,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
+    <!-- Campo de senha -->
     <EditText
         android:id="@+id/passwordInput"
         android:layout_width="0dp"
@@ -27,7 +29,8 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="16dp" />
 
-    <Button
+    <!-- Botão de Login -->
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/loginButton"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -35,8 +38,12 @@
         app:layout_constraintTop_toBottomOf="@id/passwordInput"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="16dp" />
+        android:layout_marginTop="16dp"
+        app:backgroundTint="@color/purple_500"
+        android:textColor="@android:color/white"
+        android:padding="12dp" />
 
+    <!-- Texto "ou" -->
     <TextView
         android:id="@+id/orText"
         android:layout_width="wrap_content"
@@ -48,10 +55,10 @@
         android:gravity="center"
         app:layout_constraintTop_toBottomOf="@id/loginButton"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-         />
+        app:layout_constraintEnd_toEndOf="parent" />
 
-    <Button
+    <!-- Botão de Cadastro -->
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/registerButton"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -59,6 +66,9 @@
         app:layout_constraintTop_toBottomOf="@id/orText"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="5dp" />
+        android:layout_marginTop="8dp"
+        app:backgroundTint="@color/purple_500"
+        android:textColor="@android:color/white"
+        android:padding="12dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

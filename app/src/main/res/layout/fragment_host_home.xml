@@ -18,7 +18,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Complete Your Profile"
-                android:textSize="18sp"
+                android:textSize="20sp"
                 android:textStyle="bold"
                 android:gravity="center"
                 android:padding="16dp" />
@@ -28,14 +28,20 @@
                 android:id="@+id/fullNameInput"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Full Name" />
+                android:hint="Full Name"
+                android:padding="12dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp" />
 
             <!-- Address -->
             <EditText
                 android:id="@+id/addressInput"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Address (Street, City, Country)" />
+                android:hint="Address (Street, City, Country)"
+                android:padding="12dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp" />
 
             <!-- Phone Number -->
             <EditText
@@ -43,24 +49,28 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Phone Number (+Country Code)"
-                android:inputType="phone" />
+                android:inputType="phone"
+                android:padding="12dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp" />
 
-            <!-- Upload Photo -->
+            <!-- Upload Photo Button -->
             <Button
                 android:id="@+id/uploadPhotoButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Upload Photo"
-                android:layout_marginTop="16dp" />
+                android:layout_marginTop="16dp"
+                android:padding="12dp" />
 
             <!-- Save and Continue Button -->
-            <com.google.android.material.button.MaterialButton
+            <Button
                 android:id="@+id/saveProfileButton"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Salvar Perfil" />
-
-
+                android:text="Save Profile"
+                android:layout_marginTop="10dp"
+                android:padding="12dp" />
 
         </LinearLayout>
     </ScrollView>
