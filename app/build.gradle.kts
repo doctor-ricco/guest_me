@@ -55,6 +55,11 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.10.0")
     implementation("org.json:json:20230227")
     implementation("com.google.android.material:material:1.8.0")
+    implementation("de.hdodenhof:circleimageview:3.1.0")
+    implementation("com.squareup.picasso:picasso:2.71828")
+
+
+
 
 
 

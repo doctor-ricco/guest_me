@@ -1,9 +1,12 @@
-<?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <ScrollView
+
+<ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:padding="16dp">
@@ -18,30 +21,35 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Complete Your Profile"
-                android:textSize="20sp"
+                android:textSize="18sp"
                 android:textStyle="bold"
                 android:gravity="center"
                 android:padding="16dp" />
+
+            <!-- Foto em círculo -->
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/profileImage"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_gravity="center"
+                android:src="@drawable/profile" /><!-- Imagem de placeholder -->
+                android:scaleType="centerCrop"
+                android:layout_marginBottom="16dp"
+                android:background="@android:color/darker_gray" />
 
             <!-- Full Name -->
             <EditText
                 android:id="@+id/fullNameInput"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Full Name"
-                android:padding="12dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginBottom="8dp" />
+                android:hint="Full Name" />
 
             <!-- Address -->
             <EditText
                 android:id="@+id/addressInput"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Address (Street, City, Country)"
-                android:padding="12dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginBottom="8dp" />
+                android:hint="Address (Street, City, Country)" />
 
             <!-- Phone Number -->
             <EditText
@@ -49,28 +57,29 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Phone Number (+Country Code)"
-                android:inputType="phone"
-                android:padding="12dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginBottom="8dp" />
+                android:inputType="phone" />
 
-            <!-- Upload Photo Button -->
-            <Button
+            <!-- Upload Photo -->
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/uploadPhotoButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Upload Photo"
-                android:layout_marginTop="16dp"
-                android:padding="12dp" />
+                app:backgroundTint="@color/purple_500"
+                android:textColor="@android:color/white"
+                app:cornerRadius="16dp"
+                android:layout_marginTop="16dp" />
 
             <!-- Save and Continue Button -->
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/saveProfileButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Save Profile"
-                android:layout_marginTop="10dp"
-                android:padding="12dp" />
+                android:text="Salvar Perfil"
+                app:backgroundTint="@color/teal_700"
+                android:textColor="@android:color/white"
+                app:cornerRadius="16dp"
+                android:layout_marginTop="16dp" />
 
         </LinearLayout>
     </ScrollView>

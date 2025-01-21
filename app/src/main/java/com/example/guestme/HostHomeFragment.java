@@ -25,6 +25,7 @@ import androidx.navigation.Navigation;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.squareup.picasso.Picasso;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -36,6 +37,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 public class HostHomeFragment extends Fragment {
 
@@ -158,6 +161,51 @@ public class HostHomeFragment extends Fragment {
         }
     }
 
+//    private void uploadPhotoToCloudinary() {
+//        if (selectedImageUri != null) {
+//            try {
+//                String filePath = getRealPathFromURI(selectedImageUri);
+//                if (filePath != null) {
+//                    File imageFile = new File(filePath);
+//                    CloudinaryUploader.uploadImage(imageFile, new okhttp3.Callback() {
+//                        @Override
+//                        public void onFailure(okhttp3.Call call, IOException e) {
+//                            getActivity().runOnUiThread(() ->
+//                                    Toast.makeText(getActivity(), "Upload failed: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+//                            Log.e("HostHomeFragment", "Cloudinary upload failed", e);
+//                        }
+//
+//                        @Override
+//                        public void onResponse(okhttp3.Call call, okhttp3.Response response) throws IOException {
+//                            if (response.isSuccessful()) {
+//                                String responseBody = response.body().string();
+//                                uploadedImageUrl = extractImageUrlFromResponse(responseBody);
+//                                getActivity().runOnUiThread(() ->
+//                                        Toast.makeText(getActivity(), "Photo uploaded successfully!", Toast.LENGTH_SHORT).show());
+//                                CircleImageView profileImage = getView().findViewById(R.id.profileImage);
+//                                Picasso.get().load(uploadedImageUrl).placeholder(R.drawable.profile).into(profileImage);
+//
+//                            } else {
+//                                getActivity().runOnUiThread(() ->
+//                                        Toast.makeText(getActivity(), "Upload failed", Toast.LENGTH_SHORT).show());
+//                            }
+//                        }
+//                    });
+//                } else {
+//                    Toast.makeText(getActivity(), "Failed to get file path", Toast.LENGTH_SHORT).show();
+//                    Log.e("HostHomeFragment", "File path is null");
+//                }
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//                Toast.makeText(getActivity(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+//                Log.e("HostHomeFragment", "Error during upload", e);
+//            }
+//        } else {
+//            Toast.makeText(getActivity(), "No image selected", Toast.LENGTH_SHORT).show();
+//            Log.e("HostHomeFragment", "Selected image URI is null");
+//        }
+//    }
+
     private void uploadPhotoToCloudinary() {
         if (selectedImageUri != null) {
             try {
@@ -177,27 +225,41 @@ public class HostHomeFragment extends Fragment {
                             if (response.isSuccessful()) {
                                 String responseBody = response.body().string();
                                 uploadedImageUrl = extractImageUrlFromResponse(responseBody);
-                                getActivity().runOnUiThread(() ->
-                                        Toast.makeText(getActivity(), "Photo uploaded successfully!", Toast.LENGTH_SHORT).show());
-                                Log.d("HostHomeFragment", "Uploaded Image URL: " + uploadedImageUrl);
+
+                                getActivity().runOnUiThread(() -> {
+                                    Toast.makeText(getActivity(), "Photo uploaded successfully!", Toast.LENGTH_SHORT).show();
+
+                                    // Atualiza o CircleImageView com a URL da imagem carregada
+                                    CircleImageView profileImage = getView().findViewById(R.id.profileImage);
+                                    if (profileImage != null) {
+                                        Picasso.get()
+                                                .load(uploadedImageUrl)
+                                                .placeholder(R.drawable.profile) // Substitua pelo seu drawable de placeholder
+                                                .into(profileImage);
+                                    } else {
+                                        Log.e("HostHomeFragment", "profileImage view is null");
+                                    }
+                                });
                             } else {
                                 getActivity().runOnUiThread(() ->
                                         Toast.makeText(getActivity(), "Upload failed", Toast.LENGTH_SHORT).show());
-                                Log.e("HostHomeFragment", "Cloudinary upload response: " + response.message());
+                                Log.e("HostHomeFragment", "Cloudinary response unsuccessful");
                             }
                         }
                     });
                 } else {
-                    Toast.makeText(getActivity(), "Failed to get file path", Toast.LENGTH_SHORT).show();
+                    getActivity().runOnUiThread(() ->
+                            Toast.makeText(getActivity(), "Failed to get file path", Toast.LENGTH_SHORT).show());
                     Log.e("HostHomeFragment", "File path is null");
                 }
             } catch (Exception e) {
-                e.printStackTrace();
-                Toast.makeText(getActivity(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                getActivity().runOnUiThread(() ->
+                        Toast.makeText(getActivity(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show());
                 Log.e("HostHomeFragment", "Error during upload", e);
             }
         } else {
-            Toast.makeText(getActivity(), "No image selected", Toast.LENGTH_SHORT).show();
+            getActivity().runOnUiThread(() ->
+                    Toast.makeText(getActivity(), "No image selected", Toast.LENGTH_SHORT).show());
             Log.e("HostHomeFragment", "Selected image URI is null");
         }
     }
