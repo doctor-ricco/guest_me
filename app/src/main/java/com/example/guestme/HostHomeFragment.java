@@ -62,7 +62,7 @@ public class HostHomeFragment extends Fragment {
 
                     if (imageUri != null) {
                         selectedImageUri = imageUri;
-                        Toast.makeText(getActivity(), "Image selected: " + imageUri.toString(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getActivity(), "Image selected successfully!", Toast.LENGTH_SHORT).show();
                         uploadPhotoToCloudinary(); // Chamar o upload após a seleção da imagem
                     } else {
                         Toast.makeText(getActivity(), "Failed to retrieve image URI.", Toast.LENGTH_SHORT).show();
