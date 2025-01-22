@@ -33,9 +33,7 @@
                 android:layout_height="100dp"
                 android:layout_gravity="center"
                 android:src="@drawable/profile" /><!-- Imagem de placeholder -->
-                android:scaleType="centerCrop"
-                android:layout_marginBottom="16dp"
-                android:background="@android:color/darker_gray" />
+
 
             <!-- Full Name -->
             <EditText
@@ -67,7 +65,6 @@
                 android:text="Upload Photo"
                 app:backgroundTint="@color/purple_500"
                 android:textColor="@android:color/white"
-                app:cornerRadius="16dp"
                 android:layout_marginTop="16dp" />
 
             <!-- Save and Continue Button -->
@@ -75,11 +72,10 @@
                 android:id="@+id/saveProfileButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Salvar Perfil"
-                app:backgroundTint="@color/teal_700"
+                android:text="Save and continue"
+                app:backgroundTint="@color/purple_500"
                 android:textColor="@android:color/white"
-                app:cornerRadius="16dp"
-                android:layout_marginTop="16dp" />
+                android:layout_marginTop="12dp" />
 
         </LinearLayout>
     </ScrollView>
