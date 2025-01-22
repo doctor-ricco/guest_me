@@ -22,7 +22,7 @@
             android:id="@+id/preferenceCuisine"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Cuisine" />
+            android:text="Gastronomy and Culinary" />
 
         <CheckBox
             android:id="@+id/preferenceHistory"
@@ -35,6 +35,36 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Nature Walks" />
+
+        <CheckBox
+            android:id="@+id/preferenceBeach"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Peaceful Beach" />
+
+        <CheckBox
+            android:id="@+id/preferenceSurf"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Beach for surfing" />
+
+        <CheckBox
+            android:id="@+id/preferenceNocturneLife"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Nocturne Lifestyle" />
+
+        <CheckBox
+            android:id="@+id/preferenceMonuments"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Churches and Monuments" />
+
+        <CheckBox
+            android:id="@+id/preferenceShoppingSale"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Shopping and Sale" />
 
         <Button
             android:id="@+id/savePreferencesButton"

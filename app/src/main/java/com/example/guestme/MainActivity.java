@@ -8,11 +8,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
 public class MainActivity extends AppCompatActivity {
-//
-//    @Override
-//    protected void onCreate(Bundle savedInstanceState) {
-//        super.onCreate(savedInstanceState);
-//        setContentView(R.layout.activity_main);
+
 
 
     @Override
@@ -31,7 +27,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
 }
-
 
         // O MainActivity agora apenas hospeda o NavHostFragment.
         // Toda a lógica do "Bem-vindo!" e do botão Logout será movida para um fragmento.

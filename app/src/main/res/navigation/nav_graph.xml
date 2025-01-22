@@ -35,5 +35,5 @@
         android:id="@+id/preferencesFragment"
         android:name="com.example.guestme.PreferencesFragment"
         android:label="Preferences"
-        tools:layout="@layout/fragment_preferences" />
+        tools:layout="@layout/fragment_preferences" /> -->
 </navigation>

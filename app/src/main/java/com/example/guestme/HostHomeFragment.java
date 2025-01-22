@@ -82,70 +82,7 @@ public class HostHomeFragment extends Fragment {
                 }
             });
 
-//    @Nullable
-//    @Override
-//    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-//        View view = inflater.inflate(R.layout.fragment_host_home, container, false);
-//
-//        EditText fullNameInput = view.findViewById(R.id.fullNameInput);
-//        EditText addressInput = view.findViewById(R.id.addressInput);
-//        EditText phoneInput = view.findViewById(R.id.phoneInput);
-//        Button saveProfileButton = view.findViewById(R.id.saveProfileButton);
-//        Button uploadPhotoButton = view.findViewById(R.id.uploadPhotoButton);
-//
-//        uploadPhotoButton.setOnClickListener(v -> openImagePicker());
-//        saveProfileButton.setOnClickListener(v -> {
-//            String fullName = fullNameInput.getText().toString();
-//            String address = addressInput.getText().toString();
-//            String phone = phoneInput.getText().toString();
-//
-//            if (fullName.isEmpty() || address.isEmpty() || phone.isEmpty() || uploadedImageUrl == null) {
-//                Toast.makeText(getActivity(), "Please complete all fields and upload a photo", Toast.LENGTH_SHORT).show();
-//                return;
-//            }
-//
-//            String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-//            Map<String, Object> userProfile = new HashMap<>();
-//            userProfile.put("fullName", fullName);
-//            userProfile.put("address", address);
-//            userProfile.put("phone", phone);
-//            userProfile.put("photoUrl", uploadedImageUrl);
-//
-//            FirebaseFirestore.getInstance().collection("users")
-//                    .document(userId)
-//                    .update(userProfile)
-//
-//                    .addOnSuccessListener(new OnSuccessListener<Void>() {
-//                        @Override
-//                        public void onSuccess(Void aVoid) {
-//                            Log.d("HostHomeFragment", "Profile saved successfully!");
-//                            Toast.makeText(getActivity(), "Profile saved successfully!", Toast.LENGTH_SHORT).show();
-//
-//                            // Usar a view do fragmento para encontrar o NavController
-//                            View view = getView();
-//                            if (view != null) {
-//                                try {
-//                                    NavController navController = Navigation.findNavController(view);
-//                                    navController.navigate(R.id.action_hostHomeFragment_to_preferencesFragment);
-//                                    Log.d("HostHomeFragment", "Navigation successful");
-//                                } catch (Exception e) {
-//                                    Log.e("HostHomeFragment", "Navigation error: " + e.getMessage(), e);
-//                                }
-//                            } else {
-//                                Log.e("HostHomeFragment", "View is null. Navigation failed.");
-//                            }
-//                        }
-//                    })
-//
-//
-//                    .addOnFailureListener(e -> {
-//                        Log.e("HostHomeFragment", "Error saving profile: " + e.getMessage(), e);
-//                        Toast.makeText(getActivity(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-//                    });
-//        });
-//
-//        return view;
-//    }
+
 @Nullable
 @Override
 public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
