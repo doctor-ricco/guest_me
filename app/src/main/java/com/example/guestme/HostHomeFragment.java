@@ -6,6 +6,8 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -21,8 +23,12 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
+import androidx.navigation.fragment.NavHostFragment;
 
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.squareup.picasso.Picasso;
@@ -76,59 +82,126 @@ public class HostHomeFragment extends Fragment {
                 }
             });
 
-    @Nullable
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_host_home, container, false);
+//    @Nullable
+//    @Override
+//    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+//        View view = inflater.inflate(R.layout.fragment_host_home, container, false);
+//
+//        EditText fullNameInput = view.findViewById(R.id.fullNameInput);
+//        EditText addressInput = view.findViewById(R.id.addressInput);
+//        EditText phoneInput = view.findViewById(R.id.phoneInput);
+//        Button saveProfileButton = view.findViewById(R.id.saveProfileButton);
+//        Button uploadPhotoButton = view.findViewById(R.id.uploadPhotoButton);
+//
+//        uploadPhotoButton.setOnClickListener(v -> openImagePicker());
+//        saveProfileButton.setOnClickListener(v -> {
+//            String fullName = fullNameInput.getText().toString();
+//            String address = addressInput.getText().toString();
+//            String phone = phoneInput.getText().toString();
+//
+//            if (fullName.isEmpty() || address.isEmpty() || phone.isEmpty() || uploadedImageUrl == null) {
+//                Toast.makeText(getActivity(), "Please complete all fields and upload a photo", Toast.LENGTH_SHORT).show();
+//                return;
+//            }
+//
+//            String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+//            Map<String, Object> userProfile = new HashMap<>();
+//            userProfile.put("fullName", fullName);
+//            userProfile.put("address", address);
+//            userProfile.put("phone", phone);
+//            userProfile.put("photoUrl", uploadedImageUrl);
+//
+//            FirebaseFirestore.getInstance().collection("users")
+//                    .document(userId)
+//                    .update(userProfile)
+//
+//                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+//                        @Override
+//                        public void onSuccess(Void aVoid) {
+//                            Log.d("HostHomeFragment", "Profile saved successfully!");
+//                            Toast.makeText(getActivity(), "Profile saved successfully!", Toast.LENGTH_SHORT).show();
+//
+//                            // Usar a view do fragmento para encontrar o NavController
+//                            View view = getView();
+//                            if (view != null) {
+//                                try {
+//                                    NavController navController = Navigation.findNavController(view);
+//                                    navController.navigate(R.id.action_hostHomeFragment_to_preferencesFragment);
+//                                    Log.d("HostHomeFragment", "Navigation successful");
+//                                } catch (Exception e) {
+//                                    Log.e("HostHomeFragment", "Navigation error: " + e.getMessage(), e);
+//                                }
+//                            } else {
+//                                Log.e("HostHomeFragment", "View is null. Navigation failed.");
+//                            }
+//                        }
+//                    })
+//
+//
+//                    .addOnFailureListener(e -> {
+//                        Log.e("HostHomeFragment", "Error saving profile: " + e.getMessage(), e);
+//                        Toast.makeText(getActivity(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+//                    });
+//        });
+//
+//        return view;
+//    }
+@Nullable
+@Override
+public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    View view = inflater.inflate(R.layout.fragment_host_home, container, false);
 
-        EditText fullNameInput = view.findViewById(R.id.fullNameInput);
-        EditText addressInput = view.findViewById(R.id.addressInput);
-        EditText phoneInput = view.findViewById(R.id.phoneInput);
-        Button saveProfileButton = view.findViewById(R.id.saveProfileButton);
-        Button uploadPhotoButton = view.findViewById(R.id.uploadPhotoButton);
-
-        uploadPhotoButton.setOnClickListener(v -> openImagePicker());
-        saveProfileButton.setOnClickListener(v -> {
-            String fullName = fullNameInput.getText().toString();
-            String address = addressInput.getText().toString();
-            String phone = phoneInput.getText().toString();
-
-            if (fullName.isEmpty() || address.isEmpty() || phone.isEmpty() || uploadedImageUrl == null) {
-                Toast.makeText(getActivity(), "Please complete all fields and upload a photo", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-            Map<String, Object> userProfile = new HashMap<>();
-            userProfile.put("fullName", fullName);
-            userProfile.put("address", address);
-            userProfile.put("phone", phone);
-            userProfile.put("photoUrl", uploadedImageUrl);
-
-            FirebaseFirestore.getInstance().collection("users")
-                    .document(userId)
-                    .update(userProfile)
-                    .addOnSuccessListener(aVoid -> {
-                        Log.d("HostHomeFragment", "Profile saved successfully!");
-                        Toast.makeText(getActivity(), "Profile saved successfully!", Toast.LENGTH_SHORT).show();
-                        try {
-                            if (getActivity() != null && isAdded()) {
-                                Navigation.findNavController(view).navigate(R.id.action_hostHomeFragment_to_preferencesFragment);
-                            } else {
-                                Log.e("HostHomeFragment", "Navigation failed: Activity or Fragment not valid");
-                            }
-                        } catch (Exception e) {
-                            Log.e("HostHomeFragment", "Navigation Exception: " + e.getMessage(), e);
-                        }
-                    })
-                    .addOnFailureListener(e -> {
-                        Log.e("HostHomeFragment", "Error saving profile: " + e.getMessage(), e);
-                        Toast.makeText(getActivity(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    });
-        });
-
-        return view;
+    // Adiciona logs para verificar o FragmentManager e a hierarquia
+    FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
+    for (Fragment fragment : fragmentManager.getFragments()) {
+        Log.d("HostHomeFragment", "Fragment encontrado: " + fragment.getClass().getSimpleName());
     }
+
+    // O restante do código existente deve permanecer
+    EditText fullNameInput = view.findViewById(R.id.fullNameInput);
+    EditText addressInput = view.findViewById(R.id.addressInput);
+    EditText phoneInput = view.findViewById(R.id.phoneInput);
+    Button saveProfileButton = view.findViewById(R.id.saveProfileButton);
+    Button uploadPhotoButton = view.findViewById(R.id.uploadPhotoButton);
+
+    uploadPhotoButton.setOnClickListener(v -> openImagePicker());
+    saveProfileButton.setOnClickListener(v -> {
+        String fullName = fullNameInput.getText().toString();
+        String address = addressInput.getText().toString();
+        String phone = phoneInput.getText().toString();
+
+        if (fullName.isEmpty() || address.isEmpty() || phone.isEmpty() || uploadedImageUrl == null) {
+            Toast.makeText(getActivity(), "Please complete all fields and upload a photo", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        Map<String, Object> userProfile = new HashMap<>();
+        userProfile.put("fullName", fullName);
+        userProfile.put("address", address);
+        userProfile.put("phone", phone);
+        userProfile.put("photoUrl", uploadedImageUrl);
+
+        FirebaseFirestore.getInstance().collection("users")
+                .document(userId)
+                .update(userProfile)
+                .addOnSuccessListener(aVoid -> {
+                    Log.d("HostHomeFragment", "Profile saved successfully!");
+                    Toast.makeText(getActivity(), "Profile saved successfully!", Toast.LENGTH_SHORT).show();
+
+                    Intent intent = new Intent(getActivity(), PreferencesActivity.class);
+                    startActivity(intent);
+                    requireActivity().finish(); // Opcional, para evitar que o usuário volte para esta tela
+                })
+
+                .addOnFailureListener(e -> {
+                    Log.e("HostHomeFragment", "Error saving profile: " + e.getMessage(), e);
+                    Toast.makeText(getActivity(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+    });
+
+    return view;
+}
 
     private void openImagePicker() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) { // Android 13+
@@ -160,51 +233,6 @@ public class HostHomeFragment extends Fragment {
             Toast.makeText(getActivity(), "Failed to open image picker: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
-
-//    private void uploadPhotoToCloudinary() {
-//        if (selectedImageUri != null) {
-//            try {
-//                String filePath = getRealPathFromURI(selectedImageUri);
-//                if (filePath != null) {
-//                    File imageFile = new File(filePath);
-//                    CloudinaryUploader.uploadImage(imageFile, new okhttp3.Callback() {
-//                        @Override
-//                        public void onFailure(okhttp3.Call call, IOException e) {
-//                            getActivity().runOnUiThread(() ->
-//                                    Toast.makeText(getActivity(), "Upload failed: " + e.getMessage(), Toast.LENGTH_SHORT).show());
-//                            Log.e("HostHomeFragment", "Cloudinary upload failed", e);
-//                        }
-//
-//                        @Override
-//                        public void onResponse(okhttp3.Call call, okhttp3.Response response) throws IOException {
-//                            if (response.isSuccessful()) {
-//                                String responseBody = response.body().string();
-//                                uploadedImageUrl = extractImageUrlFromResponse(responseBody);
-//                                getActivity().runOnUiThread(() ->
-//                                        Toast.makeText(getActivity(), "Photo uploaded successfully!", Toast.LENGTH_SHORT).show());
-//                                CircleImageView profileImage = getView().findViewById(R.id.profileImage);
-//                                Picasso.get().load(uploadedImageUrl).placeholder(R.drawable.profile).into(profileImage);
-//
-//                            } else {
-//                                getActivity().runOnUiThread(() ->
-//                                        Toast.makeText(getActivity(), "Upload failed", Toast.LENGTH_SHORT).show());
-//                            }
-//                        }
-//                    });
-//                } else {
-//                    Toast.makeText(getActivity(), "Failed to get file path", Toast.LENGTH_SHORT).show();
-//                    Log.e("HostHomeFragment", "File path is null");
-//                }
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//                Toast.makeText(getActivity(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-//                Log.e("HostHomeFragment", "Error during upload", e);
-//            }
-//        } else {
-//            Toast.makeText(getActivity(), "No image selected", Toast.LENGTH_SHORT).show();
-//            Log.e("HostHomeFragment", "Selected image URI is null");
-//        }
-//    }
 
     private void uploadPhotoToCloudinary() {
         if (selectedImageUri != null) {

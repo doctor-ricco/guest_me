@@ -57,6 +57,8 @@ dependencies {
     implementation("com.google.android.material:material:1.8.0")
     implementation("de.hdodenhof:circleimageview:3.1.0")
     implementation("com.squareup.picasso:picasso:2.71828")
+    implementation("com.google.android.gms:play-services-basement:18.2.0")
+
 
 
 
