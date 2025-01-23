@@ -1,5 +1,6 @@
 package com.example.guestme;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.CheckBox;
 import android.widget.Toast;
@@ -75,6 +76,13 @@ public class PreferencesActivity extends AppCompatActivity {
                                     .set(userPreferences)
                                     .addOnSuccessListener(aVoid2 -> {
                                         Toast.makeText(this, "Preferences saved successfully!", Toast.LENGTH_SHORT).show();
+
+                                      
+                                        Intent intent = new Intent(PreferencesActivity.this, HostProfileActivity.class);
+                                        startActivity(intent);
+                                        finish(); // Opcional, para evitar que o usuário volte para esta tela
+
+
                                     })
                                     .addOnFailureListener(e2 -> {
                                         Toast.makeText(this, "Error saving preferences: " + e2.getMessage(), Toast.LENGTH_SHORT).show();

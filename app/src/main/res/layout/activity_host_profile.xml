@@ -1,0 +1,61 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center_horizontal">
+
+        <!-- Foto de perfil -->
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/profile_image"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_gravity="center"
+            android:src="@drawable/profile" /> <!-- Imagem de placeholder -->
+
+
+        <!-- Mensagem de boas-vindas -->
+        <TextView
+            android:id="@+id/welcome_message"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Resumo dos dados do usuário -->
+        <TextView
+            android:id="@+id/user_info"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Descrição do host -->
+        <TextView
+            android:id="@+id/host_description"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Experiências ou atividades oferecidas -->
+        <TextView
+            android:id="@+id/host_experiences"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Botão para editar perfil -->
+        <Button
+            android:id="@+id/edit_profile_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Editar Perfil" />
+    </LinearLayout>
+</ScrollView>
