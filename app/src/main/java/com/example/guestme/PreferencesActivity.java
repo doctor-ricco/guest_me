@@ -1,8 +1,13 @@
 package com.example.guestme;
 
+import static android.app.PendingIntent.getActivity;
+
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.CheckBox;
+import android.widget.EdgeEffect;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -50,7 +55,6 @@ public class PreferencesActivity extends AppCompatActivity {
             if (preferences.isEmpty()) {
                 Toast.makeText(this, "No preferences selected!", Toast.LENGTH_SHORT).show();
             } else {
-                // Obter o ID do usuário autenticado
                 String userId = auth.getCurrentUser() != null ? auth.getCurrentUser().getUid() : null;
 
                 if (userId == null) {
@@ -58,15 +62,13 @@ public class PreferencesActivity extends AppCompatActivity {
                     return;
                 }
 
-                // Atualizar os dados existentes no Firestore
                 db.collection("users")
                         .document(userId)
                         .update("preferences", preferences, "timestamp", System.currentTimeMillis())
                         .addOnSuccessListener(aVoid -> {
-                            Toast.makeText(this, "Preferences updated successfully!", Toast.LENGTH_SHORT).show();
+                            navigateToProfile();
                         })
                         .addOnFailureListener(e -> {
-                            // Se falhar, tentar criar o documento com merge
                             Map<String, Object> userPreferences = new HashMap<>();
                             userPreferences.put("preferences", preferences);
                             userPreferences.put("timestamp", System.currentTimeMillis());
@@ -75,14 +77,7 @@ public class PreferencesActivity extends AppCompatActivity {
                                     .document(userId)
                                     .set(userPreferences)
                                     .addOnSuccessListener(aVoid2 -> {
-                                        Toast.makeText(this, "Preferences saved successfully!", Toast.LENGTH_SHORT).show();
-
-                                      
-                                        Intent intent = new Intent(PreferencesActivity.this, HostProfileActivity.class);
-                                        startActivity(intent);
-                                        finish(); // Opcional, para evitar que o usuário volte para esta tela
-
-
+                                        navigateToProfile();
                                     })
                                     .addOnFailureListener(e2 -> {
                                         Toast.makeText(this, "Error saving preferences: " + e2.getMessage(), Toast.LENGTH_SHORT).show();
@@ -90,5 +85,11 @@ public class PreferencesActivity extends AppCompatActivity {
                         });
             }
         });
+
+    }
+    private void navigateToProfile() {
+        Intent intent = new Intent(PreferencesActivity.this, HostProfileActivity.class);
+        startActivity(intent);
+        finish(); // Para evitar que o usuário volte para a tela de preferências
     }
 }

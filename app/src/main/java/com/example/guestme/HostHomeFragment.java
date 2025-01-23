@@ -6,8 +6,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
+
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -24,11 +23,8 @@ import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
-import androidx.navigation.fragment.NavHostFragment;
 
-import com.google.android.gms.tasks.OnSuccessListener;
+
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.squareup.picasso.Picasso;
