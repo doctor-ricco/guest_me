@@ -15,16 +15,17 @@
             android:layout_width="100dp"
             android:layout_height="100dp"
             android:layout_gravity="center"
-            android:src="@drawable/profile" /> <!-- Imagem de placeholder -->
-
+            android:src="@drawable/profile" /> <!-- Placeholder -->
 
         <!-- Mensagem de boas-vindas -->
         <TextView
             android:id="@+id/welcome_message"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:text="Carregando boas-vindas..."
             android:textSize="20sp"
             android:textStyle="bold"
+            android:layout_marginTop="16dp"
             android:layout_marginBottom="16dp" />
 
         <!-- Resumo dos dados do usuário -->
@@ -32,6 +33,7 @@
             android:id="@+id/user_info"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:text="Carregando informações do usuário..."
             android:textSize="16sp"
             android:layout_marginBottom="16dp" />
 
@@ -40,6 +42,7 @@
             android:id="@+id/host_description"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:text="Carregando descrição do host..."
             android:textSize="16sp"
             android:layout_marginBottom="16dp" />
 
@@ -48,6 +51,7 @@
             android:id="@+id/host_experiences"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:text="Carregando experiências oferecidas..."
             android:textSize="16sp"
             android:layout_marginBottom="16dp" />
 
@@ -56,6 +60,7 @@
             android:id="@+id/edit_profile_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Editar Perfil" />
+            android:text="Editar Perfil"
+            android:layout_marginTop="16dp" />
     </LinearLayout>
 </ScrollView>
