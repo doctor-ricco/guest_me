@@ -5,8 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-
-<ScrollView
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:padding="16dp">
@@ -34,7 +33,6 @@
                 android:layout_gravity="center"
                 android:src="@drawable/profile" /><!-- Imagem de placeholder -->
 
-
             <!-- Full Name -->
             <EditText
                 android:id="@+id/fullNameInput"
@@ -57,7 +55,27 @@
                 android:hint="Phone Number (+Country Code)"
                 android:inputType="phone" />
 
-            <!-- Upload Photo -->
+            <!-- Descrição -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="About You"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:layout_marginTop="16dp"
+                android:padding="8dp" />
+
+            <EditText
+                android:id="@+id/hostDescription"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Tell us more about you"
+                android:inputType="textMultiLine"
+                android:minHeight="100dp"
+                android:gravity="top"
+                android:padding="8dp" />
+
+            <!-- Botão para upload de foto -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/uploadPhotoButton"
                 android:layout_width="match_parent"
@@ -67,12 +85,12 @@
                 android:textColor="@android:color/white"
                 android:layout_marginTop="16dp" />
 
-            <!-- Save and Continue Button -->
+            <!-- Botão para salvar perfil -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/saveProfileButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Save and continue"
+                android:text="Save and Continue"
                 app:backgroundTint="@color/purple_500"
                 android:textColor="@android:color/white"
                 android:layout_marginTop="12dp" />
