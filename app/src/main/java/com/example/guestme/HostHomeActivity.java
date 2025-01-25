@@ -14,8 +14,18 @@ public class HostHomeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_host_home);
 
-        // Carregar o HostHomeFragment
-        loadFragment(new HostHomeFragment());
+        // Verificar se estamos editando o perfil
+        boolean isEditing = getIntent().getBooleanExtra("isEditing", false);
+
+        // Passar o parâmetro para o fragmento
+        Bundle bundle = new Bundle();
+        bundle.putBoolean("isEditing", isEditing);
+
+        HostHomeFragment fragment = new HostHomeFragment();
+        fragment.setArguments(bundle);
+
+        // Carregar o fragmento
+        loadFragment(fragment);
     }
 
     private void loadFragment(Fragment fragment) {

@@ -78,11 +78,22 @@ public class HostProfileActivity extends AppCompatActivity {
 
                             // Carregar imagem do perfil usando Glide
                             if (profileImageUrl != null && !profileImageUrl.isEmpty()) {
-                                Glide.with(this)
-                                        .load(profileImageUrl)
-                                        .placeholder(R.drawable.profile) // Placeholder
-                                        .error(R.drawable.profile) // Imagem de erro
-                                        .into(profileImage);
+                                Log.d("HostProfileActivity", "Loading profile image from URL: " + profileImageUrl);
+
+                                // Verificar se a URL começa com http:// ou https://
+                                if (!profileImageUrl.startsWith("http://") && !profileImageUrl.startsWith("https://")) {
+                                    Log.e("HostProfileActivity", "Invalid image URL: " + profileImageUrl);
+                                    Toast.makeText(this, "Invalid image URL.", Toast.LENGTH_SHORT).show();
+                                } else {
+                                    Glide.with(this)
+                                            .load(profileImageUrl)
+                                            .placeholder(R.drawable.profile) // Placeholder
+                                            .error(R.drawable.profile) // Imagem de erro
+                                            .into(profileImage);
+                                }
+                            } else {
+                                Log.d("HostProfileActivity", "Profile image URL is null or empty.");
+                                Toast.makeText(this, "No profile image found.", Toast.LENGTH_SHORT).show();
                             }
                         } else {
                             Log.e("HostProfileActivity", "Usuário não encontrado no Firestore.");
@@ -96,8 +107,8 @@ public class HostProfileActivity extends AppCompatActivity {
 
         // Listener para editar perfil
         editProfileButton.setOnClickListener(v -> {
-            // Navegar para a tela de completar perfil (HostHomeFragment)
             Intent intent = new Intent(HostProfileActivity.this, HostHomeActivity.class);
+            intent.putExtra("isEditing", true); // Indica que o usuário está editando o perfil
             startActivity(intent);
         });
     }

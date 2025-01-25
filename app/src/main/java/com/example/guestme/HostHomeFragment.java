@@ -18,10 +18,10 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
 import com.squareup.picasso.Picasso;
@@ -44,60 +44,145 @@ public class HostHomeFragment extends Fragment {
     private Uri selectedImageUri; // URI da imagem selecionada
     private String uploadedImageUrl; // URL da imagem após upload no Cloudinary
     private CircleImageView profileImage; // Referência ao CircleImageView para atualizar a imagem
+    private EditText fullNameInput, addressInput, phoneInput, descriptionInput;
 
+    private FirebaseFirestore firestore;
+    private FirebaseAuth auth;
+
+    private boolean isEditing = false; // Indica se o usuário está editando o perfil
+
+    // ActivityResultLauncher para selecionar imagens
     private final ActivityResultLauncher<Intent> imagePickerLauncher =
             registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
                 if (result.getResultCode() == getActivity().RESULT_OK && result.getData() != null) {
-                    Uri imageUri = result.getData().getData();
-                    if (imageUri != null) {
-                        selectedImageUri = imageUri;
-                        uploadPhotoToCloudinary(); // Faz o upload da imagem ao Cloudinary
+                    selectedImageUri = result.getData().getData();
+                    if (selectedImageUri != null) {
+                        // Exibir a imagem selecionada no CircleImageView
+                        profileImage.setImageURI(selectedImageUri);
+                        // Fazer o upload da imagem ao Cloudinary
+                        uploadPhotoToCloudinary();
                     } else {
-                        Toast.makeText(getActivity(), "Image selection failed.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getActivity(), "Failed to select image.", Toast.LENGTH_SHORT).show();
                     }
                 }
             });
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        // Verificar se estamos editando o perfil
+        if (getArguments() != null) {
+            isEditing = getArguments().getBoolean("isEditing", false);
+        }
+    }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_host_home, container, false);
 
-        profileImage = view.findViewById(R.id.profileImage); // Inicializa o CircleImageView
-        EditText fullNameInput = view.findViewById(R.id.fullNameInput);
-        EditText addressInput = view.findViewById(R.id.addressInput);
-        EditText phoneInput = view.findViewById(R.id.phoneInput);
-        EditText descriptionInput = view.findViewById(R.id.hostDescription);
+        // Inicializar Firebase
+        firestore = FirebaseFirestore.getInstance();
+        auth = FirebaseAuth.getInstance();
+
+        // Referências aos elementos da UI
+        profileImage = view.findViewById(R.id.profileImage);
+        fullNameInput = view.findViewById(R.id.fullNameInput);
+        addressInput = view.findViewById(R.id.addressInput);
+        phoneInput = view.findViewById(R.id.phoneInput);
+        descriptionInput = view.findViewById(R.id.hostDescription);
 
         Button uploadPhotoButton = view.findViewById(R.id.uploadPhotoButton);
         Button saveProfileButton = view.findViewById(R.id.saveProfileButton);
 
+        // Carregar dados existentes apenas se estiver editando
+        if (isEditing) {
+            loadProfileData();
+        }
+
         uploadPhotoButton.setOnClickListener(v -> openImagePicker());
-        saveProfileButton.setOnClickListener(v -> {
-            String fullName = fullNameInput.getText().toString();
-            String address = addressInput.getText().toString();
-            String phone = phoneInput.getText().toString();
-            String description = descriptionInput.getText().toString();
-
-            if (fullName.isEmpty() || address.isEmpty() || phone.isEmpty() || description.isEmpty()) {
-                Toast.makeText(getActivity(), "Please fill out all fields.", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            saveProfileToFirestore(fullName, address, phone, description, uploadedImageUrl);
-
-            Intent intent = new Intent(getActivity(), PreferencesActivity.class);
-            startActivity(intent);
-
-        });
+        saveProfileButton.setOnClickListener(v -> saveProfile());
 
         return view;
+    }
+
+    private void loadProfileData() {
+        String userId = auth.getCurrentUser().getUid();
+
+        firestore.collection("users")
+                .document(userId)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        DocumentSnapshot document = task.getResult();
+                        if (document.exists()) {
+                            // Preencher os campos com os dados existentes
+                            fullNameInput.setText(document.getString("fullName"));
+                            addressInput.setText(document.getString("address"));
+                            phoneInput.setText(document.getString("phone"));
+                            descriptionInput.setText(document.getString("description"));
+
+                            // Carregar a imagem do perfil (se existir)
+                            String photoUrl = document.getString("photoUrl");
+                            if (photoUrl != null && !photoUrl.isEmpty()) {
+                                Picasso.get()
+                                        .load(photoUrl)
+                                        .placeholder(R.drawable.profile)
+                                        .error(R.drawable.profile)
+                                        .into(profileImage);
+                            }
+                        } else {
+                            Toast.makeText(getActivity(), "User document does not exist.", Toast.LENGTH_SHORT).show();
+                        }
+                    } else {
+                        Toast.makeText(getActivity(), "Failed to load profile data.", Toast.LENGTH_SHORT).show();
+                        Log.e("HostHomeFragment", "Error loading profile data", task.getException());
+                    }
+                });
     }
 
     private void openImagePicker() {
         Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         intent.setType("image/*");
-        imagePickerLauncher.launch(intent); // Este método chama o imagePickerLauncher para selecionar uma imagem
+        imagePickerLauncher.launch(intent); // Usar o ActivityResultLauncher para selecionar a imagem
+    }
+
+    private void saveProfile() {
+        String fullName = fullNameInput.getText().toString();
+        String address = addressInput.getText().toString();
+        String phone = phoneInput.getText().toString();
+        String description = descriptionInput.getText().toString();
+
+        if (fullName.isEmpty() || address.isEmpty() || phone.isEmpty() || description.isEmpty()) {
+            Toast.makeText(getActivity(), "Please fill out all fields.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        saveProfileToFirestore(fullName, address, phone, description, uploadedImageUrl);
+
+        // Navegar para a tela de preferências após salvar
+        Intent intent = new Intent(getActivity(), PreferencesActivity.class);
+        startActivity(intent);
+    }
+
+    private void saveProfileToFirestore(String fullName, String address, String phone, String description, String photoUrl) {
+        String userId = auth.getCurrentUser().getUid();
+        Map<String, Object> profileData = new HashMap<>();
+        profileData.put("fullName", fullName);
+        profileData.put("address", address);
+        profileData.put("phone", phone);
+        profileData.put("description", description);
+        if (photoUrl != null) profileData.put("photoUrl", photoUrl);
+
+        firestore.collection("users")
+                .document(userId)
+                .set(profileData, SetOptions.merge()) // Mescla os dados existentes
+                .addOnSuccessListener(aVoid -> Toast.makeText(getActivity(), "Profile updated successfully!", Toast.LENGTH_SHORT).show())
+                .addOnFailureListener(e -> {
+                    Toast.makeText(getActivity(), "Failed to update profile: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    Log.e("HostHomeFragment", "Error updating profile", e);
+                });
     }
 
     private void uploadPhotoToCloudinary() {
@@ -145,42 +230,6 @@ public class HostHomeFragment extends Fragment {
         }
     }
 
-    private void saveProfileToFirestore(String fullName, String address, String phone, String description, String photoUrl) {
-        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        FirebaseFirestore.getInstance().collection("users").document(userId).get()
-                .addOnSuccessListener(documentSnapshot -> {
-                    if (documentSnapshot.exists()) {
-                        Map<String, Object> existingData = documentSnapshot.getData(); // Dados existentes
-                        if (existingData != null) {
-                            existingData.put("fullName", fullName);
-                            existingData.put("address", address);
-                            existingData.put("phone", phone);
-                            existingData.put("description", description);
-                            if (photoUrl != null) existingData.put("photoUrl", photoUrl);
-
-                            FirebaseFirestore.getInstance().collection("users")
-                                    .document(userId)
-                                    .set(existingData, SetOptions.merge()) // Mescla os dados existentes
-                                    .addOnSuccessListener(aVoid -> Toast.makeText(getActivity(), "Profile updated successfully!", Toast.LENGTH_SHORT).show())
-                                    .addOnFailureListener(e -> Toast.makeText(getActivity(), "Failed to update profile: " + e.getMessage(), Toast.LENGTH_SHORT).show());
-                        }
-                    } else {
-                        Toast.makeText(getActivity(), "User document does not exist.", Toast.LENGTH_SHORT).show();
-                    }
-                })
-                .addOnFailureListener(e -> Toast.makeText(getActivity(), "Error fetching user data: " + e.getMessage(), Toast.LENGTH_SHORT).show());
-    }
-
-    private String extractImageUrlFromResponse(String responseBody) {
-        try {
-            JSONObject json = new JSONObject(responseBody);
-            return json.getString("secure_url");
-        } catch (JSONException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
     private String getRealPathFromURI(Uri uri) {
         if (uri == null) return null;
 
@@ -219,5 +268,15 @@ public class HostHomeFragment extends Fragment {
             }
         }
         return null;
+    }
+
+    private String extractImageUrlFromResponse(String responseBody) {
+        try {
+            JSONObject json = new JSONObject(responseBody);
+            return json.getString("secure_url");
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }
