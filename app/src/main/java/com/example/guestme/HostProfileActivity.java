@@ -1,5 +1,6 @@
 package com.example.guestme;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
@@ -95,7 +96,9 @@ public class HostProfileActivity extends AppCompatActivity {
 
         // Listener para editar perfil
         editProfileButton.setOnClickListener(v -> {
-            Toast.makeText(this, "Funcionalidade de edição em desenvolvimento.", Toast.LENGTH_SHORT).show();
+            // Navegar para a tela de completar perfil (HostHomeFragment)
+            Intent intent = new Intent(HostProfileActivity.this, HostHomeActivity.class);
+            startActivity(intent);
         });
     }
 }

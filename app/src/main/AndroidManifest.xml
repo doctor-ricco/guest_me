@@ -21,6 +21,8 @@
 
         <activity android:name=".HostProfileActivity" />
 
+        <activity android:name=".HostHomeActivity" />
+
         <activity
             android:name=".VisitorActivity"
             android:exported="false" />
