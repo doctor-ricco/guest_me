@@ -50,6 +50,7 @@ public class HostHomeFragment extends Fragment {
     private FirebaseAuth auth;
 
     private boolean isEditing = false; // Indica se o usuário está editando o perfil
+    private boolean isProfileComplete = false; // Indica se o perfil está completo
 
     // ActivityResultLauncher para selecionar imagens
     private final ActivityResultLauncher<Intent> imagePickerLauncher =
@@ -96,15 +97,53 @@ public class HostHomeFragment extends Fragment {
         Button uploadPhotoButton = view.findViewById(R.id.uploadPhotoButton);
         Button saveProfileButton = view.findViewById(R.id.saveProfileButton);
 
-        // Carregar dados existentes apenas se estiver editando
-        if (isEditing) {
+        // Verificar se o perfil está completo (apenas se não estiver editando)
+        if (!isEditing) {
+            checkProfileCompletion();
+        } else {
+            // Se estiver editando, carregar os dados do perfil
             loadProfileData();
         }
 
+        // Configurar o botão de upload de foto
         uploadPhotoButton.setOnClickListener(v -> openImagePicker());
+
+        // Configurar o botão de salvar perfil
         saveProfileButton.setOnClickListener(v -> saveProfile());
 
         return view;
+    }
+
+    private void checkProfileCompletion() {
+        String userId = auth.getCurrentUser().getUid();
+
+        firestore.collection("users")
+                .document(userId)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        DocumentSnapshot document = task.getResult();
+                        if (document.exists()) {
+                            // Verificar se todos os campos necessários estão preenchidos
+                            isProfileComplete = document.contains("fullName") &&
+                                    document.contains("address") &&
+                                    document.contains("phone") &&
+                                    document.contains("description");
+
+                            if (isProfileComplete) {
+                                // Se o perfil estiver completo, redirecionar para a HostProfileActivity
+                                Intent intent = new Intent(getActivity(), HostProfileActivity.class);
+                                startActivity(intent);
+                                getActivity().finish(); // Finalizar a atividade atual para evitar voltar ao fragmento
+                            }
+                        } else {
+                            Toast.makeText(getActivity(), "User document does not exist.", Toast.LENGTH_SHORT).show();
+                        }
+                    } else {
+                        Toast.makeText(getActivity(), "Failed to load profile data.", Toast.LENGTH_SHORT).show();
+                        Log.e("HostHomeFragment", "Error loading profile data", task.getException());
+                    }
+                });
     }
 
     private void loadProfileData() {
@@ -178,7 +217,10 @@ public class HostHomeFragment extends Fragment {
         firestore.collection("users")
                 .document(userId)
                 .set(profileData, SetOptions.merge()) // Mescla os dados existentes
-                .addOnSuccessListener(aVoid -> Toast.makeText(getActivity(), "Profile updated successfully!", Toast.LENGTH_SHORT).show())
+                .addOnSuccessListener(aVoid -> {
+                    Toast.makeText(getActivity(), "Profile updated successfully!", Toast.LENGTH_SHORT).show();
+                    isProfileComplete = true; // Marcar o perfil como completo
+                })
                 .addOnFailureListener(e -> {
                     Toast.makeText(getActivity(), "Failed to update profile: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                     Log.e("HostHomeFragment", "Error updating profile", e);
