@@ -28,32 +28,69 @@
             android:layout_marginTop="16dp"
             android:layout_marginBottom="16dp" />
 
-        <!-- Resumo dos dados do usuário -->
+        <!-- Endereço do usuário -->
         <TextView
-            android:id="@+id/user_info"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Carregando informações do usuário..."
+            android:text="Address:"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginTop="8dp" />
+        <TextView
+            android:id="@+id/user_address"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Carregando endereço..."
             android:textSize="16sp"
-            android:layout_marginBottom="16dp" />
+            android:layout_marginBottom="8dp" />
+
+        <!-- Telefone do usuário -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Phone:"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginTop="8dp" />
+        <TextView
+            android:id="@+id/user_phone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Carregando telefone..."
+            android:textSize="16sp"
+            android:layout_marginBottom="8dp" />
 
         <!-- Descrição do host -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="About:"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginTop="8dp" />
         <TextView
             android:id="@+id/host_description"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Carregando descrição do host..."
             android:textSize="16sp"
-            android:layout_marginBottom="16dp" />
+            android:layout_marginBottom="8dp" />
 
-        <!-- Experiências ou atividades oferecidas -->
+        <!-- Preferências -->
         <TextView
-            android:id="@+id/host_experiences"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Carregando experiências oferecidas..."
+            android:text="Preferences:"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginTop="8dp" />
+        <TextView
+            android:id="@+id/host_preferences"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Carregando preferências..."
             android:textSize="16sp"
-            android:layout_marginBottom="16dp" />
+            android:layout_marginBottom="8dp" />
 
         <!-- Botão para editar perfil -->
         <Button

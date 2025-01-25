@@ -1,36 +1,35 @@
 package com.example.guestme;
 
-import static android.app.PendingIntent.getActivity;
-
-import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.CheckBox;
-import android.widget.EdgeEffect;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class PreferencesActivity extends AppCompatActivity {
+
+    private FirebaseFirestore db;
+    private FirebaseAuth auth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_preferences);
 
-        // Inicializar Firebase Firestore
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        FirebaseAuth auth = FirebaseAuth.getInstance();
+        // Inicializar Firebase
+        db = FirebaseFirestore.getInstance();
+        auth = FirebaseAuth.getInstance();
 
+        // Referências aos CheckBoxes
         CheckBox cuisineCheckBox = findViewById(R.id.preferenceCuisine);
         CheckBox historyCheckBox = findViewById(R.id.preferenceHistory);
         CheckBox natureCheckBox = findViewById(R.id.preferenceNature);
@@ -40,6 +39,7 @@ public class PreferencesActivity extends AppCompatActivity {
         CheckBox monumentsCheckBox = findViewById(R.id.preferenceMonuments);
         CheckBox shoppingCheckBox = findViewById(R.id.preferenceShoppingSale);
 
+        // Listener para salvar preferências
         findViewById(R.id.savePreferencesButton).setOnClickListener(view -> {
             List<String> preferences = new ArrayList<>();
 
@@ -54,42 +54,66 @@ public class PreferencesActivity extends AppCompatActivity {
 
             if (preferences.isEmpty()) {
                 Toast.makeText(this, "No preferences selected!", Toast.LENGTH_SHORT).show();
-            } else {
-                String userId = auth.getCurrentUser() != null ? auth.getCurrentUser().getUid() : null;
-
-                if (userId == null) {
-                    Toast.makeText(this, "User not authenticated!", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                db.collection("users")
-                        .document(userId)
-                        .update("preferences", preferences, "timestamp", System.currentTimeMillis())
-                        .addOnSuccessListener(aVoid -> {
-                            navigateToProfile();
-                        })
-                        .addOnFailureListener(e -> {
-                            Map<String, Object> userPreferences = new HashMap<>();
-                            userPreferences.put("preferences", preferences);
-                            userPreferences.put("timestamp", System.currentTimeMillis());
-
-                            db.collection("users")
-                                    .document(userId)
-                                    .set(userPreferences)
-                                    .addOnSuccessListener(aVoid2 -> {
-                                        navigateToProfile();
-                                    })
-                                    .addOnFailureListener(e2 -> {
-                                        Toast.makeText(this, "Error saving preferences: " + e2.getMessage(), Toast.LENGTH_SHORT).show();
-                                    });
-                        });
+                return;
             }
-        });
 
+            String userId = auth.getCurrentUser() != null ? auth.getCurrentUser().getUid() : null;
+
+            if (userId == null) {
+                Toast.makeText(this, "User not authenticated!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // Referência ao documento do usuário
+            DocumentReference userDocRef = db.collection("users").document(userId);
+
+            // Verificar se o documento existe antes de atualizar
+            userDocRef.get().addOnCompleteListener(task -> {
+                if (task.isSuccessful() && task.getResult() != null && task.getResult().exists()) {
+                    // Documento existe, atualizar preferências
+                    userDocRef.update("preferences", preferences)
+                            .addOnSuccessListener(aVoid -> navigateToProfile())
+                            .addOnFailureListener(e -> {
+                                Toast.makeText(this, "Failed to save preferences: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                Log.e("PreferencesActivity", "Error updating preferences", e);
+                            });
+                } else {
+                    // Documento não existe, criar novo documento
+                    userDocRef.set(new UserPreferences(preferences))
+                            .addOnSuccessListener(aVoid -> navigateToProfile())
+                            .addOnFailureListener(e -> {
+                                Toast.makeText(this, "Failed to create preferences: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                Log.e("PreferencesActivity", "Error creating preferences", e);
+                            });
+                }
+            });
+        });
     }
+
     private void navigateToProfile() {
+        // Navegar para a tela de perfil e finalizar todas as telas anteriores
         Intent intent = new Intent(PreferencesActivity.this, HostProfileActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK); // Limpar stack de atividades
         startActivity(intent);
-        finish(); // Para evitar que o usuário volte para a tela de preferências
+    }
+
+    // Classe auxiliar para salvar preferências no Firestore
+    public static class UserPreferences {
+        private List<String> preferences;
+
+        public UserPreferences() {
+        }
+
+        public UserPreferences(List<String> preferences) {
+            this.preferences = preferences;
+        }
+
+        public List<String> getPreferences() {
+            return preferences;
+        }
+
+        public void setPreferences(List<String> preferences) {
+            this.preferences = preferences;
+        }
     }
 }

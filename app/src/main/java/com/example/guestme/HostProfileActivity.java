@@ -13,6 +13,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.List;
+
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class HostProfileActivity extends AppCompatActivity {
@@ -28,9 +30,10 @@ public class HostProfileActivity extends AppCompatActivity {
         // Referências aos elementos da UI
         CircleImageView profileImage = findViewById(R.id.profile_image);
         TextView welcomeMessage = findViewById(R.id.welcome_message);
-        TextView userInfo = findViewById(R.id.user_info);
+        TextView userAddress = findViewById(R.id.user_address);
+        TextView userPhone = findViewById(R.id.user_phone);
         TextView hostDescription = findViewById(R.id.host_description);
-        TextView hostExperiences = findViewById(R.id.host_experiences);
+        TextView hostPreferences = findViewById(R.id.host_preferences);
         Button editProfileButton = findViewById(R.id.edit_profile_button);
 
         // Inicializar Firebase Auth e Firestore
@@ -53,20 +56,26 @@ public class HostProfileActivity extends AppCompatActivity {
                     if (task.isSuccessful()) {
                         DocumentSnapshot document = task.getResult();
                         if (document.exists()) {
+                            // Obter os dados do documento
                             String fullName = document.getString("fullName");
+                            String firstName = fullName != null ? fullName.split(" ")[0] : "Host";
                             String location = document.getString("address");
                             String phone = document.getString("phone");
                             String description = document.getString("description");
-                            String experiences = document.getString("experiences");
                             String profileImageUrl = document.getString("photoUrl");
 
-                            // Configurar a UI com os dados
-                            welcomeMessage.setText("Welcome, Host " + fullName + "!");
-                            userInfo.setText("Address: " + location + "\nPhone: " + phone);
-                            hostDescription.setText("About: " + description);
-                            hostExperiences.setText("Experiences: " + experiences);
+                            // Obter a lista de preferências
+                            List<String> preferencesList = (List<String>) document.get("preferences");
+                            String preferences = preferencesList != null ? String.join(", ", preferencesList) : "No preferences set.";
 
-                            // Carregar imagem do Cloudinary usando Glide
+                            // Configurar a UI com os dados
+                            welcomeMessage.setText("Welcome, Host " + firstName + "!");
+                            userAddress.setText(location != null ? location : "N/A");
+                            userPhone.setText(phone != null ? phone : "N/A");
+                            hostDescription.setText(description != null ? description : "N/A");
+                            hostPreferences.setText(preferences);
+
+                            // Carregar imagem do perfil usando Glide
                             if (profileImageUrl != null && !profileImageUrl.isEmpty()) {
                                 Glide.with(this)
                                         .load(profileImageUrl)
