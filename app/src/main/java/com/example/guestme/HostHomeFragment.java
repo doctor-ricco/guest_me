@@ -40,6 +40,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -87,7 +88,24 @@ public class HostHomeFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        
+        // Initialize location data with callback
+        LocationData.initialize(requireContext(), success -> {
+            if (isAdded() && getActivity() != null) { // Check if fragment is still attached
+                requireActivity().runOnUiThread(() -> {
+                    if (isAdded()) { // Check again on UI thread
+                        if (success) {
+                            setupCountrySpinner();
+                        } else {
+                            Toast.makeText(requireContext(), 
+                                "Failed to load countries. Please check your internet connection.", 
+                                Toast.LENGTH_LONG).show();
+                        }
+                    }
+                });
+            }
+        });
+        
         // Verificar se estamos editando o perfil
         if (getArguments() != null) {
             isEditing = getArguments().getBoolean("isEditing", false);
@@ -157,29 +175,6 @@ public class HostHomeFragment extends Fragment {
             }
         });
 
-        // Set up country spinner
-        ArrayAdapter<String> countryAdapter = new ArrayAdapter<>(
-            requireContext(),
-            android.R.layout.simple_spinner_item,
-            LocationData.getCountries()
-        );
-        countryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        countrySpinner.setAdapter(countryAdapter);
-        
-        // Set up city spinner
-        countrySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                String selectedCountry = (String) parent.getItemAtPosition(position);
-                updateCitySpinner(selectedCountry);
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-                // Do nothing
-            }
-        });
-
         // Verificar se o perfil está completo (apenas se não estiver editando)
         if (!isEditing) {
             checkProfileCompletion();
@@ -239,27 +234,42 @@ public class HostHomeFragment extends Fragment {
                     if (task.isSuccessful()) {
                         DocumentSnapshot document = task.getResult();
                         if (document.exists()) {
-                            // Preencher os campos com os dados existentes
-                            fullNameInput.setText(document.getString("fullName"));
-                            addressInput.setText(document.getString("address"));
-                            phoneInput.setText(document.getString("phone"));
-                            descriptionInput.setText(document.getString("description"));
+                            // Store the document for later use
+                            final DocumentSnapshot finalDoc = document;
 
-                            // Carregar a imagem do perfil (se existir)
-                            String photoUrl = document.getString("photoUrl");
-                            if (photoUrl != null && !photoUrl.isEmpty()) {
-                                Picasso.get()
-                                        .load(photoUrl)
-                                        .placeholder(R.drawable.profile)
-                                        .error(R.drawable.profile)
-                                        .into(profileImage);
-                            }
+                            // Initialize location data first
+                            LocationData.initialize(requireContext(), success -> {
+                                if (isAdded() && getActivity() != null) {
+                                    requireActivity().runOnUiThread(() -> {
+                                        if (isAdded()) {
+                                            // Setup spinners first
+                                            setupCountrySpinner();
+                                            
+                                            // Then load the rest of the profile data
+                                            fullNameInput.setText(finalDoc.getString("fullName"));
+                                            addressInput.setText(finalDoc.getString("address"));
+                                            phoneInput.setText(finalDoc.getString("phone"));
+                                            descriptionInput.setText(finalDoc.getString("description"));
 
-                            // Load existing location
-                            loadExistingLocation(document);
+                                            // Load existing location after spinners are set up
+                                            loadExistingLocation(finalDoc);
 
-                            // Load existing phone number
-                            loadExistingPhoneNumber(document.getString("phone"));
+                                            // Load existing phone number
+                                            loadExistingPhoneNumber(finalDoc.getString("phone"));
+
+                                            // Load profile image
+                                            String photoUrl = finalDoc.getString("photoUrl");
+                                            if (photoUrl != null && !photoUrl.isEmpty()) {
+                                                Picasso.get()
+                                                        .load(photoUrl)
+                                                        .placeholder(R.drawable.profile)
+                                                        .error(R.drawable.profile)
+                                                        .into(profileImage);
+                                            }
+                                        }
+                                    });
+                                }
+                            });
                         } else {
                             Toast.makeText(getActivity(), "User document does not exist.", Toast.LENGTH_SHORT).show();
                         }
@@ -432,6 +442,8 @@ public class HostHomeFragment extends Fragment {
     }
 
     private void loadExistingLocation(DocumentSnapshot document) {
+        if (!isAdded() || countrySpinner == null || countrySpinner.getAdapter() == null) return;
+
         String savedCountry = document.getString("country");
         String savedCity = document.getString("city");
         
@@ -444,10 +456,12 @@ public class HostHomeFragment extends Fragment {
                 if (savedCity != null) {
                     // Wait for city spinner to be populated
                     countrySpinner.post(() -> {
-                        ArrayAdapter<String> cityAdapter = (ArrayAdapter<String>) citySpinner.getAdapter();
-                        int cityPosition = cityAdapter.getPosition(savedCity);
-                        if (cityPosition >= 0) {
-                            citySpinner.setSelection(cityPosition);
+                        if (isAdded() && citySpinner != null && citySpinner.getAdapter() != null) {
+                            ArrayAdapter<String> cityAdapter = (ArrayAdapter<String>) citySpinner.getAdapter();
+                            int cityPosition = cityAdapter.getPosition(savedCity);
+                            if (cityPosition >= 0) {
+                                citySpinner.setSelection(cityPosition);
+                            }
                         }
                     });
                 }
@@ -456,13 +470,23 @@ public class HostHomeFragment extends Fragment {
     }
 
     private void updateCitySpinner(String country) {
+        if (!isAdded()) return; // Check if fragment is attached
+        
+        List<String> cities = LocationData.getCitiesForCountry(country);
         ArrayAdapter<String> cityAdapter = new ArrayAdapter<>(
             requireContext(),
             android.R.layout.simple_spinner_item,
-            LocationData.getCitiesForCountry(country)
+            cities
         );
         cityAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        citySpinner.setAdapter(cityAdapter);
+        
+        if (isAdded() && getActivity() != null) {
+            requireActivity().runOnUiThread(() -> {
+                if (isAdded() && citySpinner != null) {
+                    citySpinner.setAdapter(cityAdapter);
+                }
+            });
+        }
     }
 
     private boolean validatePhoneNumber(String phoneNumber) {
@@ -504,6 +528,40 @@ public class HostHomeFragment extends Fragment {
         } catch (NumberParseException e) {
             // If parsing fails, just show the number without flag
             phoneInput.setText(phoneNumber);
+        }
+    }
+
+    private void setupCountrySpinner() {
+        if (!isAdded()) return; // Check if fragment is attached
+        
+        List<String> countries = LocationData.getCountries();
+        ArrayAdapter<String> countryAdapter = new ArrayAdapter<>(
+            requireContext(),
+            android.R.layout.simple_spinner_item,
+            countries
+        );
+        countryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        
+        if (isAdded() && getActivity() != null) {
+            requireActivity().runOnUiThread(() -> {
+                if (isAdded() && countrySpinner != null) {
+                    countrySpinner.setAdapter(countryAdapter);
+                    
+                    // Set up city spinner listener
+                    countrySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                        @Override
+                        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                            if (isAdded()) {
+                                String selectedCountry = (String) parent.getItemAtPosition(position);
+                                updateCitySpinner(selectedCountry);
+                            }
+                        }
+
+                        @Override
+                        public void onNothingSelected(AdapterView<?> parent) {}
+                    });
+                }
+            });
         }
     }
 }

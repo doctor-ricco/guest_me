@@ -1,0 +1,22 @@
+{
+  "countries": {
+    "United States": {
+      "cities": [
+        "New York", "Los Angeles", "Chicago", "Houston", "Phoenix", "Philadelphia",
+        "San Antonio", "San Diego", "Dallas", "San Jose", "Miami", "Boston"
+      ]
+    },
+    "Canada": {
+      "cities": [
+        "Toronto", "Montreal", "Vancouver", "Calgary", "Edmonton", "Ottawa",
+        "Quebec City", "Winnipeg", "Hamilton", "Halifax"
+      ]
+    },
+    "Brazil": {
+      "cities": [
+        "São Paulo", "Rio de Janeiro", "Brasília", "Salvador", "Fortaleza",
+        "Belo Horizonte", "Manaus", "Curitiba", "Recife", "Porto Alegre"
+      ]
+    }
+  }
+} 

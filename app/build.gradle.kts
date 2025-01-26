@@ -64,6 +64,7 @@ dependencies {
     implementation("de.hdodenhof:circleimageview:3.1.0")
     implementation("androidx.fragment:fragment:1.6.1")
     implementation("io.michaelrocks:libphonenumber-android:8.13.25")
+    implementation("com.google.android.libraries.places:places:3.3.0")
 
 
 
