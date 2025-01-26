@@ -17,11 +17,16 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+import io.michaelrocks.libphonenumber.android.NumberParseException;
+import io.michaelrocks.libphonenumber.android.PhoneNumberUtil;
+import io.michaelrocks.libphonenumber.android.Phonenumber;
+import com.example.guestme.utils.CountryUtils;
 
 public class HostProfileActivity extends AppCompatActivity {
 
     private FirebaseAuth auth;
     private FirebaseFirestore firestore;
+    private PhoneNumberUtil phoneNumberUtil;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +48,9 @@ public class HostProfileActivity extends AppCompatActivity {
         // Inicializar Firebase Auth e Firestore
         auth = FirebaseAuth.getInstance();
         firestore = FirebaseFirestore.getInstance();
+
+        // Initialize PhoneNumberUtil
+        phoneNumberUtil = PhoneNumberUtil.createInstance(this);
 
         // Obter o UID do usuário atual
         String userId = auth.getCurrentUser() != null ? auth.getCurrentUser().getUid() : null;
@@ -102,6 +110,22 @@ public class HostProfileActivity extends AppCompatActivity {
                             } else {
                                 Log.d("HostProfileActivity", "Profile image URL is null or empty.");
                                 Toast.makeText(this, "No profile image found.", Toast.LENGTH_SHORT).show();
+                            }
+
+                            // Format phone number with flag
+                            try {
+                                Phonenumber.PhoneNumber number = phoneNumberUtil.parse(phone, null);
+                                String regionCode = phoneNumberUtil.getRegionCodeForNumber(number);
+                                if (regionCode != null) {
+                                    String flag = CountryUtils.getCountryFlag(regionCode);
+                                    String formattedNumber = phoneNumberUtil.format(number, 
+                                        PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL);
+                                    userPhone.setText(flag + " " + formattedNumber);
+                                } else {
+                                    userPhone.setText(phone != null ? phone : "N/A");
+                                }
+                            } catch (NumberParseException e) {
+                                userPhone.setText(phone != null ? phone : "N/A");
                             }
                         } else {
                             Log.e("HostProfileActivity", "Usuário não encontrado no Firestore.");

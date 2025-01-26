@@ -48,6 +48,7 @@ import io.michaelrocks.libphonenumber.android.NumberParseException;
 import io.michaelrocks.libphonenumber.android.PhoneNumberUtil;
 import io.michaelrocks.libphonenumber.android.Phonenumber;
 import com.google.android.material.textfield.TextInputLayout;
+import com.example.guestme.utils.CountryUtils;
 
 public class HostHomeFragment extends Fragment {
 
@@ -133,7 +134,26 @@ public class HostHomeFragment extends Fragment {
 
             @Override
             public void afterTextChanged(Editable s) {
-                validatePhoneNumber(s.toString());
+                String phoneNumber = s.toString();
+                // Remove all emoji flags first (any character in the emoji range)
+                phoneNumber = phoneNumber.replaceAll("[\uD83C\uDDE6-\uD83C\uDDFF]{2}\\s*", "");
+                
+                if (validatePhoneNumber(phoneNumber)) {
+                    try {
+                        Phonenumber.PhoneNumber number = phoneNumberUtil.parse(phoneNumber, null);
+                        String regionCode = phoneNumberUtil.getRegionCodeForNumber(number);
+                        if (regionCode != null) {
+                            String flag = CountryUtils.getCountryFlag(regionCode);
+                            // Only update if the number is valid
+                            phoneInput.removeTextChangedListener(this);
+                            phoneInput.setText(flag + " " + phoneNumber);
+                            phoneInput.setSelection(phoneInput.length());
+                            phoneInput.addTextChangedListener(this);
+                        }
+                    } catch (NumberParseException e) {
+                        // Ignore parsing errors while typing
+                    }
+                }
             }
         });
 
@@ -467,11 +487,22 @@ public class HostHomeFragment extends Fragment {
     }
 
     private void loadExistingPhoneNumber(String phoneNumber) {
+        if (phoneNumber != null && !phoneNumber.isEmpty()) {
+            updatePhoneNumberWithFlag(phoneNumber);
+        }
+    }
+
+    private void updatePhoneNumberWithFlag(String phoneNumber) {
         try {
             Phonenumber.PhoneNumber number = phoneNumberUtil.parse(phoneNumber, null);
-            String formattedNumber = phoneNumberUtil.format(number, PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL);
-            phoneInput.setText(formattedNumber);
+            String regionCode = phoneNumberUtil.getRegionCodeForNumber(number);
+            if (regionCode != null) {
+                String flag = CountryUtils.getCountryFlag(regionCode);
+                String formattedNumber = phoneNumberUtil.format(number, PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL);
+                phoneInput.setText(flag + " " + formattedNumber);
+            }
         } catch (NumberParseException e) {
+            // If parsing fails, just show the number without flag
             phoneInput.setText(phoneNumber);
         }
     }

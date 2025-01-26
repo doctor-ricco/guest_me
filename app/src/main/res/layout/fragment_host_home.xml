@@ -85,7 +85,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="phone"
-                    android:maxLines="1" />
+                    android:maxLines="1"
+                    android:textSize="16sp"
+                    android:letterSpacing="0.05" />
 
             </com.google.android.material.textfield.TextInputLayout>
 
