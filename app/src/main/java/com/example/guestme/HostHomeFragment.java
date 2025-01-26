@@ -10,8 +10,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -38,6 +41,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+import com.example.guestme.utils.LocationData;
 
 public class HostHomeFragment extends Fragment {
 
@@ -45,6 +49,8 @@ public class HostHomeFragment extends Fragment {
     private String uploadedImageUrl; // URL da imagem após upload no Cloudinary
     private CircleImageView profileImage; // Referência ao CircleImageView para atualizar a imagem
     private EditText fullNameInput, addressInput, phoneInput, descriptionInput;
+    private Spinner countrySpinner;
+    private Spinner citySpinner;
 
     private FirebaseFirestore firestore;
     private FirebaseAuth auth;
@@ -93,9 +99,34 @@ public class HostHomeFragment extends Fragment {
         addressInput = view.findViewById(R.id.addressInput);
         phoneInput = view.findViewById(R.id.phoneInput);
         descriptionInput = view.findViewById(R.id.hostDescription);
+        countrySpinner = view.findViewById(R.id.country_spinner);
+        citySpinner = view.findViewById(R.id.city_spinner);
 
         Button uploadPhotoButton = view.findViewById(R.id.uploadPhotoButton);
         Button saveProfileButton = view.findViewById(R.id.saveProfileButton);
+
+        // Set up country spinner
+        ArrayAdapter<String> countryAdapter = new ArrayAdapter<>(
+            requireContext(),
+            android.R.layout.simple_spinner_item,
+            LocationData.getCountries()
+        );
+        countryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        countrySpinner.setAdapter(countryAdapter);
+        
+        // Set up city spinner
+        countrySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String selectedCountry = (String) parent.getItemAtPosition(position);
+                updateCitySpinner(selectedCountry);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                // Do nothing
+            }
+        });
 
         // Verificar se o perfil está completo (apenas se não estiver editando)
         if (!isEditing) {
@@ -171,6 +202,9 @@ public class HostHomeFragment extends Fragment {
                                         .error(R.drawable.profile)
                                         .into(profileImage);
                             }
+
+                            // Load existing location
+                            loadExistingLocation(document);
                         } else {
                             Toast.makeText(getActivity(), "User document does not exist.", Toast.LENGTH_SHORT).show();
                         }
@@ -192,20 +226,22 @@ public class HostHomeFragment extends Fragment {
         String address = addressInput.getText().toString();
         String phone = phoneInput.getText().toString();
         String description = descriptionInput.getText().toString();
+        String selectedCountry = (String) countrySpinner.getSelectedItem();
+        String selectedCity = (String) citySpinner.getSelectedItem();
 
         if (fullName.isEmpty() || address.isEmpty() || phone.isEmpty() || description.isEmpty()) {
             Toast.makeText(getActivity(), "Please fill out all fields.", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        saveProfileToFirestore(fullName, address, phone, description, uploadedImageUrl);
+        saveProfileToFirestore(fullName, address, phone, description, uploadedImageUrl, selectedCountry, selectedCity);
 
         // Navegar para a tela de preferências após salvar
         Intent intent = new Intent(getActivity(), PreferencesActivity.class);
         startActivity(intent);
     }
 
-    private void saveProfileToFirestore(String fullName, String address, String phone, String description, String photoUrl) {
+    private void saveProfileToFirestore(String fullName, String address, String phone, String description, String photoUrl, String country, String city) {
         String userId = auth.getCurrentUser().getUid();
         Map<String, Object> profileData = new HashMap<>();
         profileData.put("fullName", fullName);
@@ -213,6 +249,8 @@ public class HostHomeFragment extends Fragment {
         profileData.put("phone", phone);
         profileData.put("description", description);
         if (photoUrl != null) profileData.put("photoUrl", photoUrl);
+        profileData.put("country", country);
+        profileData.put("city", city);
 
         firestore.collection("users")
                 .document(userId)
@@ -320,5 +358,39 @@ public class HostHomeFragment extends Fragment {
             e.printStackTrace();
             return null;
         }
+    }
+
+    private void loadExistingLocation(DocumentSnapshot document) {
+        String savedCountry = document.getString("country");
+        String savedCity = document.getString("city");
+        
+        if (savedCountry != null) {
+            ArrayAdapter<String> countryAdapter = (ArrayAdapter<String>) countrySpinner.getAdapter();
+            int countryPosition = countryAdapter.getPosition(savedCountry);
+            if (countryPosition >= 0) {
+                countrySpinner.setSelection(countryPosition);
+                
+                if (savedCity != null) {
+                    // Wait for city spinner to be populated
+                    countrySpinner.post(() -> {
+                        ArrayAdapter<String> cityAdapter = (ArrayAdapter<String>) citySpinner.getAdapter();
+                        int cityPosition = cityAdapter.getPosition(savedCity);
+                        if (cityPosition >= 0) {
+                            citySpinner.setSelection(cityPosition);
+                        }
+                    });
+                }
+            }
+        }
+    }
+
+    private void updateCitySpinner(String country) {
+        ArrayAdapter<String> cityAdapter = new ArrayAdapter<>(
+            requireContext(),
+            android.R.layout.simple_spinner_item,
+            LocationData.getCitiesForCountry(country)
+        );
+        cityAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        citySpinner.setAdapter(cityAdapter);
     }
 }

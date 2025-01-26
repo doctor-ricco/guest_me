@@ -14,7 +14,6 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-
 import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -38,6 +37,8 @@ public class HostProfileActivity extends AppCompatActivity {
         TextView hostPreferences = findViewById(R.id.host_preferences);
         Button editProfileButton = findViewById(R.id.edit_profile_button);
         Button logoutButton = findViewById(R.id.logout_button);
+        TextView userCountry = findViewById(R.id.user_country);
+        TextView userCity = findViewById(R.id.user_city);
 
         // Inicializar Firebase Auth e Firestore
         auth = FirebaseAuth.getInstance();
@@ -78,19 +79,24 @@ public class HostProfileActivity extends AppCompatActivity {
                             hostDescription.setText(description != null ? description : "N/A");
                             hostPreferences.setText(preferences);
 
+                            // Set location data
+                            String country = document.getString("country");
+                            String city = document.getString("city");
+                            userCountry.setText(country != null ? country : "Not specified");
+                            userCity.setText(city != null ? city : "Not specified");
+
                             // Carregar imagem do perfil usando Glide
                             if (profileImageUrl != null && !profileImageUrl.isEmpty()) {
                                 Log.d("HostProfileActivity", "Loading profile image from URL: " + profileImageUrl);
 
-                                // Verificar se a URL começa com http:// ou https://
                                 if (!profileImageUrl.startsWith("http://") && !profileImageUrl.startsWith("https://")) {
                                     Log.e("HostProfileActivity", "Invalid image URL: " + profileImageUrl);
                                     Toast.makeText(this, "Invalid image URL.", Toast.LENGTH_SHORT).show();
                                 } else {
                                     Glide.with(this)
                                             .load(profileImageUrl)
-                                            .placeholder(R.drawable.profile) // Placeholder
-                                            .error(R.drawable.profile) // Imagem de erro
+                                            .placeholder(R.drawable.profile)
+                                            .error(R.drawable.profile)
                                             .into(profileImage);
                                 }
                             } else {
@@ -110,21 +116,17 @@ public class HostProfileActivity extends AppCompatActivity {
         // Listener para editar perfil
         editProfileButton.setOnClickListener(v -> {
             Intent intent = new Intent(HostProfileActivity.this, HostHomeActivity.class);
-            intent.putExtra("isEditing", true); // Indica que o usuário está editando o perfil
+            intent.putExtra("isEditing", true);
             startActivity(intent);
         });
 
         // Add logout button click listener
         logoutButton.setOnClickListener(v -> {
-            // Sign out from Firebase
             auth.signOut();
-            
-            // Create intent to return to login screen
             Intent intent = new Intent(HostProfileActivity.this, LoginActivity.class);
-            // Clear the back stack so user can't go back after logout
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
-            finish(); // Close the current activity
+            finish();
         });
     }
 }
