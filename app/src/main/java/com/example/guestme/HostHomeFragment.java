@@ -150,7 +150,7 @@ public class HostHomeFragment extends Fragment {
 
         Button uploadPhotoButton = view.findViewById(R.id.uploadPhotoButton);
         Button saveProfileButton = view.findViewById(R.id.saveProfileButton);
-        Button preferencesButton = view.findViewById(R.id.preferencesButton);
+        //Button preferencesButton = view.findViewById(R.id.preferencesButton);
 
         // Initialize PhoneNumberUtil
         phoneNumberUtil = PhoneNumberUtil.createInstance(requireContext());
@@ -158,10 +158,10 @@ public class HostHomeFragment extends Fragment {
         // Setup click listeners
         uploadPhotoButton.setOnClickListener(v -> openImagePicker());
         saveProfileButton.setOnClickListener(v -> saveProfile());
-        preferencesButton.setOnClickListener(v -> {
-            Intent intent = new Intent(getActivity(), PreferencesActivity.class);
-            startActivity(intent);
-        });
+//        preferencesButton.setOnClickListener(v -> {
+//            Intent intent = new Intent(getActivity(), PreferencesActivity.class);
+//            startActivity(intent);
+//        });
 
         // Setup phone number formatting
         setupPhoneNumberFormatting();
