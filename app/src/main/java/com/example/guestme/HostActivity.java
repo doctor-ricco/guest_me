@@ -11,11 +11,27 @@ public class HostActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_host);
 
-        // Substituir o conteúdo do fragment_container pelo HostHomeFragment
-        if (savedInstanceState == null) { // Garantir que o fragmento não seja adicionado duas vezes
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.fragment_container, new HostHomeFragment())
-                    .commit();
+        // Only create new fragment if savedInstanceState is null
+        if (savedInstanceState == null) {
+            // Get intent extras
+            boolean isEditing = getIntent().getBooleanExtra("isEditing", false);
+            String openFragment = getIntent().getStringExtra("openFragment");
+
+            // Create the fragment
+            HostHomeFragment fragment = new HostHomeFragment();
+            
+            // If we're editing, pass the bundle
+            if (isEditing) {
+                Bundle bundle = new Bundle();
+                bundle.putBoolean("isEditing", true);
+                fragment.setArguments(bundle);
+            }
+
+            // Replace container with fragment
+            getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.fragment_container, fragment)
+                .commit();
         }
     }
 }

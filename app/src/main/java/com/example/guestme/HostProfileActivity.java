@@ -15,12 +15,14 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.List;
+import java.util.Map;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import io.michaelrocks.libphonenumber.android.NumberParseException;
 import io.michaelrocks.libphonenumber.android.PhoneNumberUtil;
 import io.michaelrocks.libphonenumber.android.Phonenumber;
 import com.example.guestme.utils.CountryUtils;
+import com.squareup.picasso.Picasso;
 
 public class HostProfileActivity extends AppCompatActivity {
 
@@ -33,17 +35,16 @@ public class HostProfileActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_host_profile);
 
-        // Referências aos elementos da UI
-        CircleImageView profileImage = findViewById(R.id.profile_image);
-        TextView welcomeMessage = findViewById(R.id.welcome_message);
-        TextView userAddress = findViewById(R.id.user_address);
-        TextView userPhone = findViewById(R.id.user_phone);
-        TextView hostDescription = findViewById(R.id.host_description);
-        TextView hostPreferences = findViewById(R.id.host_preferences);
-        Button editProfileButton = findViewById(R.id.edit_profile_button);
-        Button logoutButton = findViewById(R.id.logout_button);
-        TextView userCountry = findViewById(R.id.user_country);
-        TextView userCity = findViewById(R.id.user_city);
+        // Update view IDs to match the new layout
+        CircleImageView profileImage = findViewById(R.id.profileImage);
+        TextView fullNameText = findViewById(R.id.fullNameText);
+        TextView descriptionText = findViewById(R.id.descriptionText);
+        TextView preferencesText = findViewById(R.id.preferencesText);
+        TextView locationText = findViewById(R.id.locationText);
+        TextView addressText = findViewById(R.id.addressText);
+        TextView phoneText = findViewById(R.id.phoneText);
+        Button editProfileButton = findViewById(R.id.editProfileButton);
+        Button logoutButton = findViewById(R.id.logoutButton);
 
         // Inicializar Firebase Auth e Firestore
         auth = FirebaseAuth.getInstance();
@@ -81,17 +82,12 @@ public class HostProfileActivity extends AppCompatActivity {
                             String preferences = preferencesList != null ? String.join(", ", preferencesList) : "No preferences set.";
 
                             // Configurar a UI com os dados
-                            welcomeMessage.setText("Welcome, Host " + firstName + "!");
-                            userAddress.setText(location != null ? location : "N/A");
-                            userPhone.setText(phone != null ? phone : "N/A");
-                            hostDescription.setText(description != null ? description : "N/A");
-                            hostPreferences.setText(preferences);
-
-                            // Set location data
-                            String country = document.getString("country");
-                            String city = document.getString("city");
-                            userCountry.setText(country != null ? country : "Not specified");
-                            userCity.setText(city != null ? city : "Not specified");
+                            fullNameText.setText(fullName);
+                            descriptionText.setText(description);
+                            locationText.setText(String.format("%s, %s", document.getString("city"), document.getString("country")));
+                            addressText.setText(location != null ? location : "N/A");
+                            phoneText.setText(phone != null ? phone : "N/A");
+                            preferencesText.setText(preferences);
 
                             // Carregar imagem do perfil usando Glide
                             if (profileImageUrl != null && !profileImageUrl.isEmpty()) {
@@ -101,7 +97,7 @@ public class HostProfileActivity extends AppCompatActivity {
                                     Log.e("HostProfileActivity", "Invalid image URL: " + profileImageUrl);
                                     Toast.makeText(this, "Invalid image URL.", Toast.LENGTH_SHORT).show();
                                 } else {
-                                    Glide.with(this)
+                                    Picasso.get()
                                             .load(profileImageUrl)
                                             .placeholder(R.drawable.profile)
                                             .error(R.drawable.profile)
@@ -120,12 +116,12 @@ public class HostProfileActivity extends AppCompatActivity {
                                     String flag = CountryUtils.getCountryFlag(regionCode);
                                     String formattedNumber = phoneNumberUtil.format(number, 
                                         PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL);
-                                    userPhone.setText(flag + " " + formattedNumber);
+                                    phoneText.setText(flag + " " + formattedNumber);
                                 } else {
-                                    userPhone.setText(phone != null ? phone : "N/A");
+                                    phoneText.setText(phone != null ? phone : "N/A");
                                 }
                             } catch (NumberParseException e) {
-                                userPhone.setText(phone != null ? phone : "N/A");
+                                phoneText.setText(phone != null ? phone : "N/A");
                             }
                         } else {
                             Log.e("HostProfileActivity", "Usuário não encontrado no Firestore.");
@@ -137,20 +133,41 @@ public class HostProfileActivity extends AppCompatActivity {
                     }
                 });
 
-        // Listener para editar perfil
+        // Setup button click listeners
         editProfileButton.setOnClickListener(v -> {
-            Intent intent = new Intent(HostProfileActivity.this, HostHomeActivity.class);
+            Intent intent = new Intent(this, HostActivity.class);
             intent.putExtra("isEditing", true);
+            intent.putExtra("openFragment", "hostHome");
             startActivity(intent);
         });
 
-        // Add logout button click listener
         logoutButton.setOnClickListener(v -> {
             auth.signOut();
-            Intent intent = new Intent(HostProfileActivity.this, LoginActivity.class);
+            Intent intent = new Intent(this, LoginActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
             finish();
         });
+    }
+
+    private void loadPreferences(String userId, TextView preferencesText) {
+        FirebaseFirestore.getInstance()
+            .collection("preferences")
+            .document(userId)
+            .get()
+            .addOnSuccessListener(document -> {
+                if (document.exists()) {
+                    // Format preferences text
+                    StringBuilder preferences = new StringBuilder();
+                    Map<String, Object> data = document.getData();
+                    for (Map.Entry<String, Object> entry : data.entrySet()) {
+                        preferences.append(entry.getKey())
+                                 .append(": ")
+                                 .append(entry.getValue())
+                                 .append("\n");
+                    }
+                    preferencesText.setText(preferences.toString().trim());
+                }
+            });
     }
 }

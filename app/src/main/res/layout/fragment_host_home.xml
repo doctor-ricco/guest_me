@@ -1,179 +1,164 @@
-<FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background">
+    android:padding="16dp">
 
-    <ScrollView
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:padding="24dp"
-        android:clipToPadding="false">
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center_horizontal">
 
-        <LinearLayout
+        <!-- Profile Image Section -->
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/profileImage"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:src="@drawable/profile"
+            android:layout_marginTop="16dp"/>
+
+        <Button
+            android:id="@+id/uploadPhotoButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Upload Photo"
+            android:layout_marginTop="8dp"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
+
+        <!-- Welcome Section -->
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:text="Welcome!"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="24dp"/>
 
-            <!-- Title -->
-            <TextView
+        <!-- 1. About Section -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/fullNameInput"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Complete Your Profile"
-                android:textAppearance="?attr/textAppearanceHeadline1"
-                android:gravity="center"
-                android:layout_marginBottom="24dp" />
-
-            <!-- Profile Image -->
-            <de.hdodenhof.circleimageview.CircleImageView
-                android:id="@+id/profileImage"
-                android:layout_width="120dp"
-                android:layout_height="120dp"
-                android:layout_gravity="center"
-                android:src="@drawable/profile"
-                app:civ_border_width="2dp"
-                app:civ_border_color="@color/primary"
-                android:layout_marginBottom="32dp" />
-
-            <!-- Full Name Input -->
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/fullNameInputLayout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
                 android:hint="Full Name"
-                style="@style/Widget.GuestMe.TextInputLayout">
+                android:inputType="textPersonName"/>
+        </com.google.android.material.textfield.TextInputLayout>
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/fullNameInput"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="textPersonName" />
-            </com.google.android.material.textfield.TextInputLayout>
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
-            <!-- Address Input -->
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/addressInputLayout"
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/hostDescription"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                android:hint="Address (Street, City, Country)"
-                style="@style/Widget.GuestMe.TextInputLayout">
+                android:hint="About me"
+                android:inputType="textMultiLine"
+                android:minLines="3"
+                android:gravity="top"/>
+        </com.google.android.material.textfield.TextInputLayout>
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/addressInput"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="textPostalAddress" />
-            </com.google.android.material.textfield.TextInputLayout>
+        <!-- 2. Preferences Section -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Preferences"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp"/>
 
-            <!-- Phone Number Input -->
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/phoneInputLayout"
+        <Button
+            android:id="@+id/preferencesButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Set Your Preferences"
+            android:layout_marginBottom="16dp"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
+
+        <!-- 3. Location Section -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Location"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp"/>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+
+            <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                android:id="@+id/country_spinner"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="24dp"
+                android:hint="Select Country"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+
+            <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                android:id="@+id/city_spinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Select City"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- 4. Address Section -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/addressInput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Address"
+                android:inputType="textPostalAddress"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- 5. Phone Section -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/phoneInputLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/phoneInput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:hint="Phone Number"
-                app:helperText="Include country code (e.g., +1 for US)"
-                app:errorEnabled="true"
-                style="@style/Widget.GuestMe.TextInputLayout">
+                android:inputType="phone"/>
+        </com.google.android.material.textfield.TextInputLayout>
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/phoneInput"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="phone"
-                    android:maxLines="1"
-                    android:textSize="16sp"
-                    android:letterSpacing="0.05" />
+        <!-- Save Button at the bottom -->
+        <Button
+            android:id="@+id/saveProfileButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Save Profile"
+            android:layout_marginBottom="16dp"/>
 
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <!-- About Section -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="About You"
-                android:textAppearance="?attr/textAppearanceHeadline2"
-                android:layout_marginBottom="16dp" />
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/descriptionInputLayout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="32dp"
-                android:hint="Tell us more about you"
-                style="@style/Widget.GuestMe.TextInputLayout">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/hostDescription"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="textMultiLine"
-                    android:minHeight="120dp"
-                    android:gravity="top"
-                    android:padding="12dp" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <!-- Add this before the Upload Photo Button -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginBottom="16dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Country"
-                    android:textStyle="bold"
-                    android:layout_marginBottom="4dp"/>
-
-                <Spinner
-                    android:id="@+id/country_spinner"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/spinner_background"
-                    android:padding="12dp"
-                    android:layout_marginBottom="16dp"/>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="City"
-                    android:textStyle="bold"
-                    android:layout_marginBottom="4dp"/>
-
-                <Spinner
-                    android:id="@+id/city_spinner"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/spinner_background"
-                    android:padding="12dp"
-                    android:layout_marginBottom="16dp"/>
-
-            </LinearLayout>
-
-            <!-- Upload Photo Button -->
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/uploadPhotoButton"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Upload Photo"
-                style="@style/Widget.GuestMe.Button.OutlinedTall"
-                android:layout_marginBottom="16dp" />
-
-            <!-- Save Profile Button -->
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/saveProfileButton"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Save and Continue"
-                style="@style/Widget.GuestMe.Button.Tall"
-                android:layout_marginBottom="16dp" />
-
-        </LinearLayout>
-    </ScrollView>
-</FrameLayout>
+    </LinearLayout>
+</ScrollView>

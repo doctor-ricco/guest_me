@@ -50,6 +50,8 @@ import io.michaelrocks.libphonenumber.android.PhoneNumberUtil;
 import io.michaelrocks.libphonenumber.android.Phonenumber;
 import com.google.android.material.textfield.TextInputLayout;
 import com.example.guestme.utils.CountryUtils;
+import android.widget.AutoCompleteTextView;
+import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 
 public class HostHomeFragment extends Fragment {
 
@@ -57,8 +59,8 @@ public class HostHomeFragment extends Fragment {
     private String uploadedImageUrl; // URL da imagem após upload no Cloudinary
     private CircleImageView profileImage; // Referência ao CircleImageView para atualizar a imagem
     private EditText fullNameInput, addressInput, phoneInput, descriptionInput;
-    private Spinner countrySpinner;
-    private Spinner citySpinner;
+    private MaterialAutoCompleteTextView countrySpinner;
+    private MaterialAutoCompleteTextView citySpinner;
 
     private FirebaseFirestore firestore;
     private FirebaseAuth auth;
@@ -91,11 +93,12 @@ public class HostHomeFragment extends Fragment {
         
         // Initialize location data with callback
         LocationData.initialize(requireContext(), success -> {
-            if (isAdded() && getActivity() != null) { // Check if fragment is still attached
+            if (isAdded() && getActivity() != null) {
                 requireActivity().runOnUiThread(() -> {
-                    if (isAdded()) { // Check again on UI thread
+                    if (isAdded()) {
                         if (success) {
-                            setupCountrySpinner();
+                            // Remove this line since we'll set up spinners in initializeViews
+                            // setupCountrySpinner();
                         } else {
                             Toast.makeText(requireContext(), 
                                 "Failed to load countries. Please check your internet connection.", 
@@ -117,10 +120,24 @@ public class HostHomeFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_host_home, container, false);
 
-        // Inicializar Firebase
+        // Initialize Firebase first
         firestore = FirebaseFirestore.getInstance();
         auth = FirebaseAuth.getInstance();
 
+        // Initialize views
+        initializeViews(view);
+        
+        // Check profile completion status
+        if (!isEditing) {
+            checkProfileCompletion();
+        } else {
+            loadProfileData();
+        }
+
+        return view;
+    }
+
+    private void initializeViews(View view) {
         // Referências aos elementos da UI
         profileImage = view.findViewById(R.id.profileImage);
         fullNameInput = view.findViewById(R.id.fullNameInput);
@@ -129,67 +146,32 @@ public class HostHomeFragment extends Fragment {
         descriptionInput = view.findViewById(R.id.hostDescription);
         countrySpinner = view.findViewById(R.id.country_spinner);
         citySpinner = view.findViewById(R.id.city_spinner);
+        phoneInputLayout = view.findViewById(R.id.phoneInputLayout);
 
         Button uploadPhotoButton = view.findViewById(R.id.uploadPhotoButton);
         Button saveProfileButton = view.findViewById(R.id.saveProfileButton);
+        Button preferencesButton = view.findViewById(R.id.preferencesButton);
 
         // Initialize PhoneNumberUtil
         phoneNumberUtil = PhoneNumberUtil.createInstance(requireContext());
 
-        // Get references
-        phoneInputLayout = view.findViewById(R.id.phoneInputLayout);
-
-        // Add phone number format hint
-        phoneInput.setHint("+1 (555) 555-5555");
-
-        // Add text change listener for real-time validation
-        phoneInput.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                String phoneNumber = s.toString();
-                // Remove all emoji flags first (any character in the emoji range)
-                phoneNumber = phoneNumber.replaceAll("[\uD83C\uDDE6-\uD83C\uDDFF]{2}\\s*", "");
-                
-                if (validatePhoneNumber(phoneNumber)) {
-                    try {
-                        Phonenumber.PhoneNumber number = phoneNumberUtil.parse(phoneNumber, null);
-                        String regionCode = phoneNumberUtil.getRegionCodeForNumber(number);
-                        if (regionCode != null) {
-                            String flag = CountryUtils.getCountryFlag(regionCode);
-                            // Only update if the number is valid
-                            phoneInput.removeTextChangedListener(this);
-                            phoneInput.setText(flag + " " + phoneNumber);
-                            phoneInput.setSelection(phoneInput.length());
-                            phoneInput.addTextChangedListener(this);
-                        }
-                    } catch (NumberParseException e) {
-                        // Ignore parsing errors while typing
-                    }
-                }
-            }
+        // Setup click listeners
+        uploadPhotoButton.setOnClickListener(v -> openImagePicker());
+        saveProfileButton.setOnClickListener(v -> saveProfile());
+        preferencesButton.setOnClickListener(v -> {
+            Intent intent = new Intent(getActivity(), PreferencesActivity.class);
+            startActivity(intent);
         });
 
-        // Verificar se o perfil está completo (apenas se não estiver editando)
-        if (!isEditing) {
-            checkProfileCompletion();
-        } else {
-            // Se estiver editando, carregar os dados do perfil
-            loadProfileData();
-        }
+        // Setup phone number formatting
+        setupPhoneNumberFormatting();
 
-        // Configurar o botão de upload de foto
-        uploadPhotoButton.setOnClickListener(v -> openImagePicker());
+        // If using MaterialAutoCompleteTextView in layout, change to:
+        MaterialAutoCompleteTextView countryInput = view.findViewById(R.id.country_spinner);
+        MaterialAutoCompleteTextView cityInput = view.findViewById(R.id.city_spinner);
 
-        // Configurar o botão de salvar perfil
-        saveProfileButton.setOnClickListener(v -> saveProfile());
-
-        return view;
+        // Update the setupCountrySpinner method to work with AutoCompleteTextView
+        setupCountrySpinner(countryInput, cityInput);
     }
 
     private void checkProfileCompletion() {
@@ -199,6 +181,8 @@ public class HostHomeFragment extends Fragment {
                 .document(userId)
                 .get()
                 .addOnCompleteListener(task -> {
+                    if (!isAdded() || getActivity() == null) return;
+
                     if (task.isSuccessful()) {
                         DocumentSnapshot document = task.getResult();
                         if (document.exists()) {
@@ -212,14 +196,20 @@ public class HostHomeFragment extends Fragment {
                                 // Se o perfil estiver completo, redirecionar para a HostProfileActivity
                                 Intent intent = new Intent(getActivity(), HostProfileActivity.class);
                                 startActivity(intent);
-                                getActivity().finish(); // Finalizar a atividade atual para evitar voltar ao fragmento
+                                getActivity().finish();
+                            } else {
+                                // If profile is not complete, load existing data (if any)
+                                loadProfileData();
                             }
                         } else {
-                            Toast.makeText(getActivity(), "User document does not exist.", Toast.LENGTH_SHORT).show();
+                            // New user, just stay on the current screen to fill out profile
+                            Log.d("HostHomeFragment", "New user, creating profile");
                         }
                     } else {
-                        Toast.makeText(getActivity(), "Failed to load profile data.", Toast.LENGTH_SHORT).show();
-                        Log.e("HostHomeFragment", "Error loading profile data", task.getException());
+                        Log.e("HostHomeFragment", "Error checking profile completion", task.getException());
+                        Toast.makeText(getActivity(), 
+                            "Error checking profile. Please try again.", 
+                            Toast.LENGTH_SHORT).show();
                     }
                 });
     }
@@ -242,8 +232,8 @@ public class HostHomeFragment extends Fragment {
                                 if (isAdded() && getActivity() != null) {
                                     requireActivity().runOnUiThread(() -> {
                                         if (isAdded()) {
-                                            // Setup spinners first
-                                            setupCountrySpinner();
+                                            // Setup spinners using the class members
+                                            setupCountrySpinner(countrySpinner, citySpinner);
                                             
                                             // Then load the rest of the profile data
                                             fullNameInput.setText(finalDoc.getString("fullName"));
@@ -291,12 +281,18 @@ public class HostHomeFragment extends Fragment {
         String address = addressInput.getText().toString();
         String phone = phoneInput.getText().toString();
         String description = descriptionInput.getText().toString();
-        String selectedCountry = (String) countrySpinner.getSelectedItem();
-        String selectedCity = (String) citySpinner.getSelectedItem();
+        String selectedCountry = countrySpinner.getText().toString();
+        String selectedCity = citySpinner.getText().toString();
 
         // Validate all fields
         if (fullName.isEmpty() || address.isEmpty() || description.isEmpty()) {
             Toast.makeText(getActivity(), "Please fill out all fields.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Validate country and city
+        if (selectedCountry.isEmpty() || selectedCity.isEmpty()) {
+            Toast.makeText(getActivity(), "Please select both country and city.", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -313,7 +309,6 @@ public class HostHomeFragment extends Fragment {
             saveProfileToFirestore(fullName, address, formattedNumber, description, uploadedImageUrl, selectedCountry, selectedCity);
         } catch (NumberParseException e) {
             Toast.makeText(getActivity(), "Error formatting phone number.", Toast.LENGTH_SHORT).show();
-            return;
         }
     }
 
@@ -442,51 +437,40 @@ public class HostHomeFragment extends Fragment {
     }
 
     private void loadExistingLocation(DocumentSnapshot document) {
-        if (!isAdded() || countrySpinner == null || countrySpinner.getAdapter() == null) return;
+        if (!isAdded() || countrySpinner == null) return;
 
         String savedCountry = document.getString("country");
         String savedCity = document.getString("city");
         
-        if (savedCountry != null) {
-            ArrayAdapter<String> countryAdapter = (ArrayAdapter<String>) countrySpinner.getAdapter();
-            int countryPosition = countryAdapter.getPosition(savedCountry);
-            if (countryPosition >= 0) {
-                countrySpinner.setSelection(countryPosition);
+        if (savedCountry != null && !savedCountry.isEmpty()) {
+            // Set the text directly for MaterialAutoCompleteTextView
+            countrySpinner.setText(savedCountry, false);
+            
+            // Update city spinner
+            if (savedCity != null && !savedCity.isEmpty()) {
+                // Update the cities list for the selected country
+                updateCitySpinner(savedCountry, citySpinner);
                 
-                if (savedCity != null) {
-                    // Wait for city spinner to be populated
-                    countrySpinner.post(() -> {
-                        if (isAdded() && citySpinner != null && citySpinner.getAdapter() != null) {
-                            ArrayAdapter<String> cityAdapter = (ArrayAdapter<String>) citySpinner.getAdapter();
-                            int cityPosition = cityAdapter.getPosition(savedCity);
-                            if (cityPosition >= 0) {
-                                citySpinner.setSelection(cityPosition);
-                            }
-                        }
-                    });
-                }
+                // Set the city text after a short delay to ensure adapter is ready
+                countrySpinner.post(() -> {
+                    if (isAdded() && citySpinner != null) {
+                        citySpinner.setText(savedCity, false);
+                    }
+                });
             }
         }
     }
 
-    private void updateCitySpinner(String country) {
-        if (!isAdded()) return; // Check if fragment is attached
+    private void updateCitySpinner(String country, MaterialAutoCompleteTextView cityInput) {
+        if (!isAdded()) return;
         
         List<String> cities = LocationData.getCitiesForCountry(country);
         ArrayAdapter<String> cityAdapter = new ArrayAdapter<>(
             requireContext(),
-            android.R.layout.simple_spinner_item,
+            android.R.layout.simple_dropdown_item_1line,
             cities
         );
-        cityAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        
-        if (isAdded() && getActivity() != null) {
-            requireActivity().runOnUiThread(() -> {
-                if (isAdded() && citySpinner != null) {
-                    citySpinner.setAdapter(cityAdapter);
-                }
-            });
-        }
+        cityInput.setAdapter(cityAdapter);
     }
 
     private boolean validatePhoneNumber(String phoneNumber) {
@@ -531,37 +515,61 @@ public class HostHomeFragment extends Fragment {
         }
     }
 
-    private void setupCountrySpinner() {
-        if (!isAdded()) return; // Check if fragment is attached
+    private void setupCountrySpinner(MaterialAutoCompleteTextView countryInput, MaterialAutoCompleteTextView cityInput) {
+        if (!isAdded()) return;
         
         List<String> countries = LocationData.getCountries();
         ArrayAdapter<String> countryAdapter = new ArrayAdapter<>(
             requireContext(),
-            android.R.layout.simple_spinner_item,
+            android.R.layout.simple_dropdown_item_1line,
             countries
         );
-        countryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         
-        if (isAdded() && getActivity() != null) {
-            requireActivity().runOnUiThread(() -> {
-                if (isAdded() && countrySpinner != null) {
-                    countrySpinner.setAdapter(countryAdapter);
-                    
-                    // Set up city spinner listener
-                    countrySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                        @Override
-                        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                            if (isAdded()) {
-                                String selectedCountry = (String) parent.getItemAtPosition(position);
-                                updateCitySpinner(selectedCountry);
-                            }
-                        }
+        countryInput.setAdapter(countryAdapter);
+        
+        countryInput.setOnItemClickListener((parent, view, position, id) -> {
+            if (isAdded()) {
+                String selectedCountry = (String) parent.getItemAtPosition(position);
+                updateCitySpinner(selectedCountry, cityInput);
+            }
+        });
+    }
 
-                        @Override
-                        public void onNothingSelected(AdapterView<?> parent) {}
-                    });
+    private void setupPhoneNumberFormatting() {
+        // Add phone number format hint
+        phoneInput.setHint("+1 (555) 555-5555");
+
+        // Add text change listener for real-time validation
+        phoneInput.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                String phoneNumber = s.toString();
+                // Remove all emoji flags first (any character in the emoji range)
+                phoneNumber = phoneNumber.replaceAll("[\uD83C\uDDE6-\uD83C\uDDFF]{2}\\s*", "");
+                
+                if (validatePhoneNumber(phoneNumber)) {
+                    try {
+                        Phonenumber.PhoneNumber number = phoneNumberUtil.parse(phoneNumber, null);
+                        String regionCode = phoneNumberUtil.getRegionCodeForNumber(number);
+                        if (regionCode != null) {
+                            String flag = CountryUtils.getCountryFlag(regionCode);
+                            // Only update if the number is valid
+                            phoneInput.removeTextChangedListener(this);
+                            phoneInput.setText(flag + " " + phoneNumber);
+                            phoneInput.setSelection(phoneInput.length());
+                            phoneInput.addTextChangedListener(this);
+                        }
+                    } catch (NumberParseException e) {
+                        // Ignore parsing errors while typing
+                    }
                 }
-            });
-        }
+            }
+        });
     }
 }

@@ -1,11 +1,9 @@
-<ScrollView 
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background"
-    android:padding="24dp"
-    android:clipToPadding="false">
+    android:padding="16dp">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -13,213 +11,111 @@
         android:orientation="vertical"
         android:gravity="center_horizontal">
 
-        <!-- Profile Photo -->
+        <!-- Profile Image -->
         <de.hdodenhof.circleimageview.CircleImageView
-            android:id="@+id/profile_image"
+            android:id="@+id/profileImage"
             android:layout_width="120dp"
             android:layout_height="120dp"
-            android:layout_gravity="center"
             android:src="@drawable/profile"
-            app:civ_border_width="2dp"
-            app:civ_border_color="@color/primary"
-            android:layout_marginBottom="24dp" />
+            android:layout_marginTop="16dp"/>
 
-        <!-- Welcome Message -->
+        <!-- 1. About Section -->
         <TextView
-            android:id="@+id/welcome_message"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Loading welcome message..."
-            android:textAppearance="?attr/textAppearanceHeadline1"
-            android:layout_marginBottom="32dp"
-            android:gravity="center" />
-
-        <!-- Address Section -->
-        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            app:cardElevation="2dp"
-            app:cardCornerRadius="8dp">
+            android:text="About"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="8dp"/>
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Address"
-                    android:textAppearance="?attr/textAppearanceHeadline2"
-                    android:layout_marginBottom="8dp" />
-
-                <TextView
-                    android:id="@+id/user_address"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Loading address..."
-                    android:textAppearance="?attr/textAppearanceBody1" />
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-        <!-- Phone Section -->
-        <com.google.android.material.card.MaterialCardView
+        <TextView
+            android:id="@+id/fullNameText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            app:cardElevation="2dp"
-            app:cardCornerRadius="8dp">
+            android:layout_marginBottom="8dp"/>
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Phone"
-                    android:textAppearance="?attr/textAppearanceHeadline2"
-                    android:layout_marginBottom="8dp" />
-
-                <TextView
-                    android:id="@+id/user_phone"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Loading phone number..."
-                    android:textAppearance="?attr/textAppearanceBody1" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Location"
-                    android:textAppearance="?attr/textAppearanceHeadline2"
-                    android:layout_marginTop="16dp"
-                    android:layout_marginBottom="8dp" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Country: "
-                        android:textStyle="bold"/>
-
-                    <TextView
-                        android:id="@+id/user_country"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Loading country..."
-                        android:textAppearance="?attr/textAppearanceBody1" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginTop="8dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="City: "
-                        android:textStyle="bold"/>
-
-                    <TextView
-                        android:id="@+id/user_city"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Loading city..."
-                        android:textAppearance="?attr/textAppearanceBody1" />
-                </LinearLayout>
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-        <!-- About Section -->
-        <com.google.android.material.card.MaterialCardView
+        <TextView
+            android:id="@+id/descriptionText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            app:cardElevation="2dp"
-            app:cardCornerRadius="8dp">
+            android:layout_marginBottom="16dp"/>
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="About"
-                    android:textAppearance="?attr/textAppearanceHeadline2"
-                    android:layout_marginBottom="8dp" />
-
-                <TextView
-                    android:id="@+id/host_description"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Loading description..."
-                    android:textAppearance="?attr/textAppearanceBody1" />
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-        <!-- Preferences Section -->
-        <com.google.android.material.card.MaterialCardView
+        <!-- 2. Preferences Section -->
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="32dp"
-            app:cardElevation="2dp"
-            app:cardCornerRadius="8dp">
+            android:text="Preferences"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp"/>
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
+        <TextView
+            android:id="@+id/preferencesText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"/>
 
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Preferences"
-                    android:textAppearance="?attr/textAppearanceHeadline2"
-                    android:layout_marginBottom="8dp" />
+        <!-- 3. Location Section -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Location"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp"/>
 
-                <TextView
-                    android:id="@+id/host_preferences"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Loading preferences..."
-                    android:textAppearance="?attr/textAppearanceBody1" />
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
+        <TextView
+            android:id="@+id/locationText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"/>
 
-        <!-- Edit Profile Button -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/edit_profile_button"
+        <!-- 4. Address Section -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Address"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:id="@+id/addressText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- 5. Phone Section -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Phone"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:id="@+id/phoneText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"/>
+
+        <!-- Buttons at the bottom -->
+        <Button
+            android:id="@+id/editProfileButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Edit Profile"
-            style="@style/Widget.GuestMe.Button.Tall"
-            android:layout_marginBottom="16dp" />
+            android:layout_marginBottom="8dp"/>
 
-        <!-- Logout Button -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/logout_button"
+        <Button
+            android:id="@+id/logoutButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Logout"
-            style="@style/Widget.GuestMe.Button.OutlinedTall"
-            android:layout_marginBottom="16dp"
-            app:strokeColor="@color/error"
-            android:textColor="@color/error" />
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_marginBottom="16dp"/>
 
     </LinearLayout>
 </ScrollView>

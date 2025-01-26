@@ -23,7 +23,9 @@
 
         <activity android:name=".HostProfileActivity" />
 
-        <activity android:name=".HostHomeActivity" />
+        <activity
+            android:name=".HostHomeActivity"
+            android:exported="false"/>
 
         <activity
             android:name=".VisitorActivity"
