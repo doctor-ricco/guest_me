@@ -6,6 +6,8 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -42,6 +44,10 @@ import java.util.Map;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import com.example.guestme.utils.LocationData;
+import io.michaelrocks.libphonenumber.android.NumberParseException;
+import io.michaelrocks.libphonenumber.android.PhoneNumberUtil;
+import io.michaelrocks.libphonenumber.android.Phonenumber;
+import com.google.android.material.textfield.TextInputLayout;
 
 public class HostHomeFragment extends Fragment {
 
@@ -57,6 +63,9 @@ public class HostHomeFragment extends Fragment {
 
     private boolean isEditing = false; // Indica se o usuário está editando o perfil
     private boolean isProfileComplete = false; // Indica se o perfil está completo
+
+    private PhoneNumberUtil phoneNumberUtil;
+    private TextInputLayout phoneInputLayout;
 
     // ActivityResultLauncher para selecionar imagens
     private final ActivityResultLauncher<Intent> imagePickerLauncher =
@@ -104,6 +113,29 @@ public class HostHomeFragment extends Fragment {
 
         Button uploadPhotoButton = view.findViewById(R.id.uploadPhotoButton);
         Button saveProfileButton = view.findViewById(R.id.saveProfileButton);
+
+        // Initialize PhoneNumberUtil
+        phoneNumberUtil = PhoneNumberUtil.createInstance(requireContext());
+
+        // Get references
+        phoneInputLayout = view.findViewById(R.id.phoneInputLayout);
+
+        // Add phone number format hint
+        phoneInput.setHint("+1 (555) 555-5555");
+
+        // Add text change listener for real-time validation
+        phoneInput.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                validatePhoneNumber(s.toString());
+            }
+        });
 
         // Set up country spinner
         ArrayAdapter<String> countryAdapter = new ArrayAdapter<>(
@@ -205,6 +237,9 @@ public class HostHomeFragment extends Fragment {
 
                             // Load existing location
                             loadExistingLocation(document);
+
+                            // Load existing phone number
+                            loadExistingPhoneNumber(document.getString("phone"));
                         } else {
                             Toast.makeText(getActivity(), "User document does not exist.", Toast.LENGTH_SHORT).show();
                         }
@@ -229,16 +264,27 @@ public class HostHomeFragment extends Fragment {
         String selectedCountry = (String) countrySpinner.getSelectedItem();
         String selectedCity = (String) citySpinner.getSelectedItem();
 
-        if (fullName.isEmpty() || address.isEmpty() || phone.isEmpty() || description.isEmpty()) {
+        // Validate all fields
+        if (fullName.isEmpty() || address.isEmpty() || description.isEmpty()) {
             Toast.makeText(getActivity(), "Please fill out all fields.", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        saveProfileToFirestore(fullName, address, phone, description, uploadedImageUrl, selectedCountry, selectedCity);
+        // Validate phone number
+        if (!validatePhoneNumber(phone)) {
+            Toast.makeText(getActivity(), "Please enter a valid phone number.", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-        // Navegar para a tela de preferências após salvar
-        Intent intent = new Intent(getActivity(), PreferencesActivity.class);
-        startActivity(intent);
+        // Format the phone number to E.164 format for storage
+        try {
+            Phonenumber.PhoneNumber number = phoneNumberUtil.parse(phone, null);
+            String formattedNumber = phoneNumberUtil.format(number, PhoneNumberUtil.PhoneNumberFormat.E164);
+            saveProfileToFirestore(fullName, address, formattedNumber, description, uploadedImageUrl, selectedCountry, selectedCity);
+        } catch (NumberParseException e) {
+            Toast.makeText(getActivity(), "Error formatting phone number.", Toast.LENGTH_SHORT).show();
+            return;
+        }
     }
 
     private void saveProfileToFirestore(String fullName, String address, String phone, String description, String photoUrl, String country, String city) {
@@ -258,6 +304,11 @@ public class HostHomeFragment extends Fragment {
                 .addOnSuccessListener(aVoid -> {
                     Toast.makeText(getActivity(), "Profile updated successfully!", Toast.LENGTH_SHORT).show();
                     isProfileComplete = true; // Marcar o perfil como completo
+
+                    // Navigate to preferences screen
+                    Intent intent = new Intent(getActivity(), PreferencesActivity.class);
+                    startActivity(intent);
+                    getActivity().finish(); // Optional: finish current activity if you don't want users to come back
                 })
                 .addOnFailureListener(e -> {
                     Toast.makeText(getActivity(), "Failed to update profile: " + e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -392,5 +443,36 @@ public class HostHomeFragment extends Fragment {
         );
         cityAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         citySpinner.setAdapter(cityAdapter);
+    }
+
+    private boolean validatePhoneNumber(String phoneNumber) {
+        try {
+            // Parse the phone number
+            Phonenumber.PhoneNumber number = phoneNumberUtil.parse(phoneNumber, null);
+            
+            // Check if the number is valid
+            boolean isValid = phoneNumberUtil.isValidNumber(number);
+            
+            if (isValid) {
+                phoneInputLayout.setError(null);
+                return true;
+            } else {
+                phoneInputLayout.setError("Please enter a valid phone number");
+                return false;
+            }
+        } catch (NumberParseException e) {
+            phoneInputLayout.setError("Please enter a valid phone number with country code (e.g., +1 for US)");
+            return false;
+        }
+    }
+
+    private void loadExistingPhoneNumber(String phoneNumber) {
+        try {
+            Phonenumber.PhoneNumber number = phoneNumberUtil.parse(phoneNumber, null);
+            String formattedNumber = phoneNumberUtil.format(number, PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL);
+            phoneInput.setText(formattedNumber);
+        } catch (NumberParseException e) {
+            phoneInput.setText(phoneNumber);
+        }
     }
 }

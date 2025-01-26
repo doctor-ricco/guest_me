@@ -75,14 +75,18 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="24dp"
-                android:hint="Phone Number (+Country Code)"
+                android:hint="Phone Number"
+                app:helperText="Include country code (e.g., +1 for US)"
+                app:errorEnabled="true"
                 style="@style/Widget.GuestMe.TextInputLayout">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/phoneInput"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="phone" />
+                    android:inputType="phone"
+                    android:maxLines="1" />
+
             </com.google.android.material.textfield.TextInputLayout>
 
             <!-- About Section -->
