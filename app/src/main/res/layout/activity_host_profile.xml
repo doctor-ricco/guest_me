@@ -163,5 +163,16 @@
             style="@style/Widget.GuestMe.Button.Tall"
             android:layout_marginBottom="16dp" />
 
+        <!-- Logout Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/logout_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Logout"
+            style="@style/Widget.GuestMe.Button.OutlinedTall"
+            android:layout_marginBottom="16dp"
+            app:strokeColor="@color/error"
+            android:textColor="@color/error" />
+
     </LinearLayout>
 </ScrollView>

@@ -14,6 +14,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+
 import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -36,6 +37,7 @@ public class HostProfileActivity extends AppCompatActivity {
         TextView hostDescription = findViewById(R.id.host_description);
         TextView hostPreferences = findViewById(R.id.host_preferences);
         Button editProfileButton = findViewById(R.id.edit_profile_button);
+        Button logoutButton = findViewById(R.id.logout_button);
 
         // Inicializar Firebase Auth e Firestore
         auth = FirebaseAuth.getInstance();
@@ -110,6 +112,19 @@ public class HostProfileActivity extends AppCompatActivity {
             Intent intent = new Intent(HostProfileActivity.this, HostHomeActivity.class);
             intent.putExtra("isEditing", true); // Indica que o usuário está editando o perfil
             startActivity(intent);
+        });
+
+        // Add logout button click listener
+        logoutButton.setOnClickListener(v -> {
+            // Sign out from Firebase
+            auth.signOut();
+            
+            // Create intent to return to login screen
+            Intent intent = new Intent(HostProfileActivity.this, LoginActivity.class);
+            // Clear the back stack so user can't go back after logout
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            finish(); // Close the current activity
         });
     }
 }
