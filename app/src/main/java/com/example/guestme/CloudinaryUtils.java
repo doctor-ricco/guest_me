@@ -18,5 +18,4 @@ public class CloudinaryUtils {
             return null; // Retorna null se ocorrer um erro
         }
     }
-
 }

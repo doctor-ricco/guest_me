@@ -11,7 +11,21 @@ public class VisitorActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_visitor);
 
-        // Exemplo de mensagem para debug
-        setTitle("Bem-vindo, Visitor!");
+        if (savedInstanceState == null) {
+            boolean isEditing = getIntent().getBooleanExtra("isEditing", false);
+            
+            VisitorHomeFragment fragment = new VisitorHomeFragment();
+            
+            if (isEditing) {
+                Bundle bundle = new Bundle();
+                bundle.putBoolean("isEditing", true);
+                fragment.setArguments(bundle);
+            }
+
+            getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.fragment_container, fragment)
+                .commit();
+        }
     }
 }
