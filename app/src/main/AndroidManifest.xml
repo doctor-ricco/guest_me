@@ -49,6 +49,9 @@
             </intent-filter>
         </activity>
         <activity android:name=".VisitorProfileActivity" />
+        <activity
+            android:name=".FindHostActivity"
+            android:exported="false" />
     </application>
 
 </manifest>

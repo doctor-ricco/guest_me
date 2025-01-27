@@ -40,6 +40,7 @@ public class VisitorProfileActivity extends AppCompatActivity {
         TextView phoneText = findViewById(R.id.phoneText);
         Button editProfileButton = findViewById(R.id.editProfileButton);
         Button logoutButton = findViewById(R.id.logoutButton);
+        Button findHostButton = findViewById(R.id.findHostButton);
 
         auth = FirebaseAuth.getInstance();
         firestore = FirebaseFirestore.getInstance();
@@ -67,6 +68,11 @@ public class VisitorProfileActivity extends AppCompatActivity {
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
             finish();
+        });
+
+        findHostButton.setOnClickListener(v -> {
+            Intent intent = new Intent(this, FindHostActivity.class);
+            startActivity(intent);
         });
     }
 
