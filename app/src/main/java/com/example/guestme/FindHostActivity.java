@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.slider.Slider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -18,15 +19,21 @@ import com.google.firebase.firestore.FirebaseFirestoreException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Locale;
+import java.util.stream.Collectors;
 
 public class FindHostActivity extends AppCompatActivity {
     private RecyclerView hostsRecyclerView;
     private HostAdapter hostAdapter;
     private ProgressBar progressBar;
     private TextView noHostsText;
+    private TextView percentageText;
+    private Slider matchSlider;
     private FirebaseFirestore firestore;
     private FirebaseAuth auth;
     private List<String> visitorPreferences;
+    private List<HostModel> allHosts; // Store all hosts
+    private float currentMatchThreshold = 70f; // Default threshold
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,14 +48,48 @@ public class FindHostActivity extends AppCompatActivity {
         hostsRecyclerView = findViewById(R.id.hostsRecyclerView);
         progressBar = findViewById(R.id.progressBar);
         noHostsText = findViewById(R.id.noHostsText);
+        matchSlider = findViewById(R.id.matchSlider);
+        percentageText = findViewById(R.id.percentageText);
 
         // Setup RecyclerView
         hostsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         hostAdapter = new HostAdapter();
         hostsRecyclerView.setAdapter(hostAdapter);
 
+        // Setup slider
+        setupMatchSlider();
+
         // Load visitor preferences and then find matching hosts
         loadVisitorPreferences();
+    }
+
+    private void setupMatchSlider() {
+        matchSlider.addOnChangeListener((slider, value, fromUser) -> {
+            currentMatchThreshold = value;
+            percentageText.setText(String.format(Locale.getDefault(), "%.0f%%", value));
+            filterHosts();
+        });
+    }
+
+    private void filterHosts() {
+        if (allHosts == null) return;
+
+        List<HostModel> filteredHosts = allHosts.stream()
+                .filter(host -> host.getMatchPercentage() >= currentMatchThreshold)
+                .collect(Collectors.toList());
+
+        updateHostsList(filteredHosts);
+    }
+
+    private void updateHostsList(List<HostModel> hosts) {
+        if (hosts.isEmpty()) {
+            noHostsText.setVisibility(View.VISIBLE);
+            hostsRecyclerView.setVisibility(View.GONE);
+        } else {
+            noHostsText.setVisibility(View.GONE);
+            hostsRecyclerView.setVisibility(View.VISIBLE);
+            hostAdapter.setHosts(hosts);
+        }
     }
 
     private void loadVisitorPreferences() {
@@ -100,8 +141,7 @@ public class FindHostActivity extends AppCompatActivity {
                 .whereEqualTo("type", "Host")
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
-                    List<HostModel> matchingHosts = new ArrayList<>();
-                    Log.d("FindHostActivity", "Found " + queryDocumentSnapshots.size() + " hosts total");
+                    allHosts = new ArrayList<>(); // Store all hosts first
 
                     for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
                         String hostId = document.getId();
@@ -126,36 +166,24 @@ public class FindHostActivity extends AppCompatActivity {
                             Log.d("FindHostActivity", "Match percentage for " + hostName + 
                                 ": " + matchPercentage + "%");
                             
-                            if (matchPercentage >= 70.0) {
-                                HostModel host = new HostModel(
-                                    document.getId(),
-                                    document.getString("fullName"),
-                                    document.getString("description"),
-                                    document.getString("city"),
-                                    document.getString("country"),
-                                    document.getString("photoUrl"),
-                                    matchPercentage
-                                );
-                                matchingHosts.add(host);
-                                Log.d("FindHostActivity", "Added matching host: " + host.getFullName() + 
-                                    " with " + matchPercentage + "% match");
-                            }
+                            // Add all hosts to allHosts list regardless of match percentage
+                            HostModel host = new HostModel(
+                                document.getId(),
+                                document.getString("fullName"),
+                                document.getString("description"),
+                                document.getString("city"),
+                                document.getString("country"),
+                                document.getString("photoUrl"),
+                                matchPercentage
+                            );
+                            allHosts.add(host);
                         }
                     }
 
                     progressBar.setVisibility(View.GONE);
                     
-                    if (matchingHosts.isEmpty()) {
-                        noHostsText.setText("No matching hosts found");
-                        noHostsText.setVisibility(View.VISIBLE);
-                        hostsRecyclerView.setVisibility(View.GONE);
-                        Log.d("FindHostActivity", "No matching hosts found after processing");
-                    } else {
-                        noHostsText.setVisibility(View.GONE);
-                        hostsRecyclerView.setVisibility(View.VISIBLE);
-                        hostAdapter.setHosts(matchingHosts);
-                        Log.d("FindHostActivity", "Found " + matchingHosts.size() + " matching hosts");
-                    }
+                    // Apply initial filter
+                    filterHosts();
                 })
                 .addOnFailureListener(e -> {
                     progressBar.setVisibility(View.GONE);
