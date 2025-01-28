@@ -42,17 +42,7 @@ public class LoginActivity extends AppCompatActivity {
                                                 String userType = document.getString("type");
 
                                                 // Redirecionar com base no tipo de usuário
-                                                if ("Host".equals(userType)) {
-                                                    Intent intent = new Intent(LoginActivity.this, HostActivity.class);
-                                                    startActivity(intent);
-                                                    finish();
-                                                } else if ("Visitor".equals(userType)) {
-                                                    Intent intent = new Intent(LoginActivity.this, VisitorActivity.class);
-                                                    startActivity(intent);
-                                                    finish();
-                                                } else {
-                                                    Toast.makeText(LoginActivity.this, "Tipo de usuário desconhecido.", Toast.LENGTH_SHORT).show();
-                                                }
+                                                navigateBasedOnUserType(userId);
                                             } else {
                                                 Toast.makeText(LoginActivity.this, "Usuário não encontrado no Firestore.", Toast.LENGTH_SHORT).show();
                                             }
@@ -72,5 +62,27 @@ public class LoginActivity extends AppCompatActivity {
             Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
             startActivity(intent);
         });
+    }
+
+    private void navigateBasedOnUserType(String userId) {
+        FirebaseFirestore firestore = FirebaseFirestore.getInstance();
+        firestore.collection("users").document(userId).get()
+                .addOnSuccessListener(document -> {
+                    if (document.exists()) {
+                        String userType = document.getString("type");
+                        Intent intent;
+                        if ("Host".equals(userType)) {
+                            intent = new Intent(LoginActivity.this, HostProfileActivity.class);
+                        } else {
+                            // Always use VisitorProfileActivity for visitors
+                            intent = new Intent(LoginActivity.this, VisitorProfileActivity.class);
+                        }
+                        startActivity(intent);
+                        finish();
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    // ... error handling ...
+                });
     }
 }

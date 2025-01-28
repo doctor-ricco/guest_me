@@ -1,5 +1,6 @@
 package com.example.guestme;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -27,5 +28,12 @@ public class VisitorActivity extends AppCompatActivity {
                 .replace(R.id.fragment_container, fragment)
                 .commit();
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent(this, VisitorProfileActivity.class);
+        startActivity(intent);
+        finish();
     }
 }

@@ -48,7 +48,10 @@
 
             </intent-filter>
         </activity>
-        <activity android:name=".VisitorProfileActivity" />
+        <activity
+            android:name=".VisitorProfileActivity"
+            android:exported="false"
+            android:launchMode="singleTop" />
         <activity
             android:name=".FindHostActivity"
             android:exported="false" />

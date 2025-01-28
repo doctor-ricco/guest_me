@@ -179,7 +179,7 @@ public class VisitorHomeFragment extends Fragment {
                     Toast.makeText(getActivity(), "Profile updated successfully!", Toast.LENGTH_SHORT).show();
                     isProfileComplete = true;
 
-                    Intent intent = new Intent(getActivity(), PreferencesActivity.class);
+                    Intent intent = new Intent(getActivity(), VisitorProfileActivity.class);
                     startActivity(intent);
                     getActivity().finish();
                 })
