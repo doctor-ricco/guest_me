@@ -31,6 +31,31 @@
             android:orientation="vertical"
             android:padding="16dp">
 
+            <!-- City Filter First -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Select City"
+                android:textStyle="bold"/>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/cityInputLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="16dp"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+
+                <AutoCompleteTextView
+                    android:id="@+id/cityFilter"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="none"
+                    android:hint="Select a city"/>
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Match Percentage Filter Second -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -61,6 +86,7 @@
                     android:layout_marginStart="16dp"
                     android:textStyle="bold"/>
             </LinearLayout>
+
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 

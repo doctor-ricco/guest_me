@@ -17,10 +17,15 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Locale;
+import java.util.Set;
 import java.util.stream.Collectors;
+
+import android.widget.AutoCompleteTextView;
+import android.widget.ArrayAdapter;
 
 public class FindHostActivity extends AppCompatActivity {
     private RecyclerView hostsRecyclerView;
@@ -34,6 +39,9 @@ public class FindHostActivity extends AppCompatActivity {
     private List<String> visitorPreferences;
     private List<HostModel> allHosts; // Store all hosts
     private float currentMatchThreshold = 70f; // Default threshold
+    private AutoCompleteTextView cityFilter;
+    private String selectedCity = null;
+    private Set<String> availableCities = new HashSet<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,6 +67,10 @@ public class FindHostActivity extends AppCompatActivity {
         // Setup slider
         setupMatchSlider();
 
+        // Initialize city filter
+        cityFilter = findViewById(R.id.cityFilter);
+        setupCityFilter();
+
         // Load visitor preferences and then find matching hosts
         loadVisitorPreferences();
     }
@@ -71,11 +83,38 @@ public class FindHostActivity extends AppCompatActivity {
         });
     }
 
+    private void setupCityFilter() {
+        cityFilter.setOnItemClickListener((parent, view, position, id) -> {
+            selectedCity = (String) parent.getItemAtPosition(position);
+            filterHosts();
+        });
+
+        // Add clear button (X) functionality
+        cityFilter.setOnClickListener(v -> {
+            if (!cityFilter.getText().toString().isEmpty()) {
+                cityFilter.setText("");
+                selectedCity = null;
+                filterHosts();
+            }
+        });
+    }
+
+    private void updateCityAdapter() {
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+            this,
+            android.R.layout.simple_dropdown_item_1line,
+            new ArrayList<>(availableCities)
+        );
+        cityFilter.setAdapter(adapter);
+    }
+
     private void filterHosts() {
         if (allHosts == null) return;
 
         List<HostModel> filteredHosts = allHosts.stream()
                 .filter(host -> host.getMatchPercentage() >= currentMatchThreshold)
+                .filter(host -> selectedCity == null || 
+                        selectedCity.equals(host.getCity()))
                 .collect(Collectors.toList());
 
         updateHostsList(filteredHosts);
@@ -83,6 +122,11 @@ public class FindHostActivity extends AppCompatActivity {
 
     private void updateHostsList(List<HostModel> hosts) {
         if (hosts.isEmpty()) {
+            String message = "No matching hosts found";
+            if (selectedCity != null) {
+                message += " in " + selectedCity;
+            }
+            noHostsText.setText(message);
             noHostsText.setVisibility(View.VISIBLE);
             hostsRecyclerView.setVisibility(View.GONE);
         } else {
@@ -141,7 +185,8 @@ public class FindHostActivity extends AppCompatActivity {
                 .whereEqualTo("type", "Host")
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
-                    allHosts = new ArrayList<>(); // Store all hosts first
+                    allHosts = new ArrayList<>();
+                    availableCities.clear(); // Clear existing cities
 
                     for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
                         String hostId = document.getId();
@@ -166,12 +211,16 @@ public class FindHostActivity extends AppCompatActivity {
                             Log.d("FindHostActivity", "Match percentage for " + hostName + 
                                 ": " + matchPercentage + "%");
                             
-                            // Add all hosts to allHosts list regardless of match percentage
+                            String city = document.getString("city");
+                            if (city != null && !city.isEmpty()) {
+                                availableCities.add(city); // Add city to available cities
+                            }
+
                             HostModel host = new HostModel(
                                 document.getId(),
                                 document.getString("fullName"),
                                 document.getString("description"),
-                                document.getString("city"),
+                                city,
                                 document.getString("country"),
                                 document.getString("photoUrl"),
                                 matchPercentage
@@ -181,8 +230,7 @@ public class FindHostActivity extends AppCompatActivity {
                     }
 
                     progressBar.setVisibility(View.GONE);
-                    
-                    // Apply initial filter
+                    updateCityAdapter(); // Update city dropdown
                     filterHosts();
                 })
                 .addOnFailureListener(e -> {
