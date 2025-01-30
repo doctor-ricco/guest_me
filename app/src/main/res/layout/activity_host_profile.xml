@@ -101,7 +101,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="24dp"/>
 
-        <!-- Buttons at the bottom -->
+        <!-- Buttons -->
         <Button
             android:id="@+id/editProfileButton"
             android:layout_width="match_parent"

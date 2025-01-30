@@ -25,11 +25,11 @@ public class PreferencesActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_preferences);
 
-        // Inicializar Firebase
+        // Initialize Firebase
         db = FirebaseFirestore.getInstance();
         auth = FirebaseAuth.getInstance();
 
-        // Referências aos CheckBoxes
+        // References to CheckBoxes
         CheckBox cuisineCheckBox = findViewById(R.id.preferenceCuisine);
         CheckBox historyCheckBox = findViewById(R.id.preferenceHistory);
         CheckBox natureCheckBox = findViewById(R.id.preferenceNature);
@@ -39,7 +39,6 @@ public class PreferencesActivity extends AppCompatActivity {
         CheckBox monumentsCheckBox = findViewById(R.id.preferenceMonuments);
         CheckBox shoppingCheckBox = findViewById(R.id.preferenceShoppingSale);
 
-        // Listener para salvar preferências
         findViewById(R.id.savePreferencesButton).setOnClickListener(view -> {
             List<String> preferences = new ArrayList<>();
 
@@ -57,52 +56,48 @@ public class PreferencesActivity extends AppCompatActivity {
                 return;
             }
 
-            String userId = auth.getCurrentUser() != null ? auth.getCurrentUser().getUid() : null;
+            savePreferences(preferences);
+        });
+    }
 
-            if (userId == null) {
-                Toast.makeText(this, "User not authenticated!", Toast.LENGTH_SHORT).show();
-                return;
+    private void savePreferences(List<String> preferences) {
+        String userId = auth.getCurrentUser() != null ? auth.getCurrentUser().getUid() : null;
+
+        if (userId == null) {
+            Toast.makeText(this, "User not authenticated!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        DocumentReference userDocRef = db.collection("users").document(userId);
+
+        // First check user type before saving preferences
+        userDocRef.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful() && task.getResult() != null && task.getResult().exists()) {
+                String userType = task.getResult().getString("type");
+                
+                // Update preferences
+                userDocRef.update("preferences", preferences)
+                        .addOnSuccessListener(aVoid -> {
+                            Toast.makeText(this, "Preferences saved successfully!", Toast.LENGTH_SHORT).show();
+                            
+                            // Navigate based on user type
+                            Intent intent;
+                            if ("Host".equals(userType)) {
+                                intent = new Intent(this, HostProfileActivity.class);
+                            } else {
+                                intent = new Intent(this, VisitorProfileActivity.class);
+                            }
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                            startActivity(intent);
+                            finish();
+                        })
+                        .addOnFailureListener(e -> {
+                            Toast.makeText(this, "Error saving preferences: " + e.getMessage(), 
+                                Toast.LENGTH_SHORT).show();
+                        });
+            } else {
+                Toast.makeText(this, "Error retrieving user type", Toast.LENGTH_SHORT).show();
             }
-
-            // Referência ao documento do usuário
-            DocumentReference userDocRef = db.collection("users").document(userId);
-
-            // Verificar se o documento existe antes de atualizar
-            userDocRef.get().addOnCompleteListener(task -> {
-                if (task.isSuccessful() && task.getResult() != null && task.getResult().exists()) {
-                    // Documento existe, atualizar preferências
-                    userDocRef.update("preferences", preferences)
-                            .addOnSuccessListener(aVoid -> {
-                                Toast.makeText(this, "Preferences saved successfully!", Toast.LENGTH_SHORT).show();
-                                
-                                // Always navigate to VisitorProfileActivity
-                                Intent intent = new Intent(this, VisitorProfileActivity.class);
-                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                                startActivity(intent);
-                                finish();
-                            })
-                            .addOnFailureListener(e -> {
-                                Toast.makeText(this, "Error saving preferences: " + e.getMessage(), 
-                                    Toast.LENGTH_SHORT).show();
-                            });
-                } else {
-                    // Documento não existe, criar novo documento
-                    userDocRef.set(new UserPreferences(preferences))
-                            .addOnSuccessListener(aVoid -> {
-                                Toast.makeText(this, "Preferences saved successfully!", Toast.LENGTH_SHORT).show();
-                                
-                                // Always navigate to VisitorProfileActivity
-                                Intent intent = new Intent(this, VisitorProfileActivity.class);
-                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                                startActivity(intent);
-                                finish();
-                            })
-                            .addOnFailureListener(e -> {
-                                Toast.makeText(this, "Error saving preferences: " + e.getMessage(), 
-                                    Toast.LENGTH_SHORT).show();
-                            });
-                }
-            });
         });
     }
 
