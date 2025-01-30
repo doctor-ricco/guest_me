@@ -52,13 +52,16 @@ import com.google.android.material.textfield.TextInputLayout;
 import com.example.guestme.utils.CountryUtils;
 import android.widget.AutoCompleteTextView;
 import com.google.android.material.textfield.MaterialAutoCompleteTextView;
+import com.example.guestme.utils.PhoneInputFormatter;
+import com.google.android.material.textfield.TextInputEditText;
 
 public class HostHomeFragment extends Fragment {
 
     private Uri selectedImageUri; // URI da imagem selecionada
     private String uploadedImageUrl; // URL da imagem após upload no Cloudinary
     private CircleImageView profileImage; // Referência ao CircleImageView para atualizar a imagem
-    private EditText fullNameInput, addressInput, phoneInput, descriptionInput;
+    private EditText fullNameInput, addressInput, descriptionInput;
+    private TextInputEditText phoneInput;
     private MaterialAutoCompleteTextView countrySpinner;
     private MaterialAutoCompleteTextView citySpinner;
 
@@ -70,6 +73,7 @@ public class HostHomeFragment extends Fragment {
 
     private PhoneNumberUtil phoneNumberUtil;
     private TextInputLayout phoneInputLayout;
+    private PhoneInputFormatter phoneFormatter;
 
     // ActivityResultLauncher para selecionar imagens
     private final ActivityResultLauncher<Intent> imagePickerLauncher =
@@ -164,7 +168,16 @@ public class HostHomeFragment extends Fragment {
 //        });
 
         // Setup phone number formatting
-        setupPhoneNumberFormatting();
+        phoneFormatter = new PhoneInputFormatter(requireContext(), phoneInputLayout, phoneInput);
+        
+        // Update phone formatting when country is selected
+        countrySpinner.setOnItemClickListener((parent, view1, position, id) -> {
+            String country = (String) parent.getItemAtPosition(position);
+            String countryCode = CountryUtils.getCountryCode(country);
+            phoneFormatter.setCountryCode(countryCode);
+        });
+
+        phoneFormatter.setupPhoneNumberFormatting();
 
         // If using MaterialAutoCompleteTextView in layout, change to:
         MaterialAutoCompleteTextView countryInput = view.findViewById(R.id.country_spinner);
@@ -297,14 +310,16 @@ public class HostHomeFragment extends Fragment {
         }
 
         // Validate phone number
-        if (!validatePhoneNumber(phone)) {
-            Toast.makeText(getActivity(), "Please enter a valid phone number.", Toast.LENGTH_SHORT).show();
+        if (!phoneFormatter.isValidPhoneNumber()) {
+            Toast.makeText(getActivity(), "Please enter a valid phone number", Toast.LENGTH_SHORT).show();
             return;
         }
 
+        String fullPhoneNumber = phoneFormatter.getFullPhoneNumber();
+
         // Format the phone number to E.164 format for storage
         try {
-            Phonenumber.PhoneNumber number = phoneNumberUtil.parse(phone, null);
+            Phonenumber.PhoneNumber number = phoneNumberUtil.parse(fullPhoneNumber, null);
             String formattedNumber = phoneNumberUtil.format(number, PhoneNumberUtil.PhoneNumberFormat.E164);
             saveProfileToFirestore(fullName, address, formattedNumber, description, uploadedImageUrl, selectedCountry, selectedCity);
         } catch (NumberParseException e) {
@@ -473,27 +488,6 @@ public class HostHomeFragment extends Fragment {
         cityInput.setAdapter(cityAdapter);
     }
 
-    private boolean validatePhoneNumber(String phoneNumber) {
-        try {
-            // Parse the phone number
-            Phonenumber.PhoneNumber number = phoneNumberUtil.parse(phoneNumber, null);
-            
-            // Check if the number is valid
-            boolean isValid = phoneNumberUtil.isValidNumber(number);
-            
-            if (isValid) {
-                phoneInputLayout.setError(null);
-                return true;
-            } else {
-                phoneInputLayout.setError("Please enter a valid phone number");
-                return false;
-            }
-        } catch (NumberParseException e) {
-            phoneInputLayout.setError("Please enter a valid phone number with country code (e.g., +1 for US)");
-            return false;
-        }
-    }
-
     private void loadExistingPhoneNumber(String phoneNumber) {
         if (phoneNumber != null && !phoneNumber.isEmpty()) {
             updatePhoneNumberWithFlag(phoneNumber);
@@ -531,44 +525,6 @@ public class HostHomeFragment extends Fragment {
             if (isAdded()) {
                 String selectedCountry = (String) parent.getItemAtPosition(position);
                 updateCitySpinner(selectedCountry, cityInput);
-            }
-        });
-    }
-
-    private void setupPhoneNumberFormatting() {
-        // Add phone number format hint
-        phoneInput.setHint("+1 (555) 555-5555");
-
-        // Add text change listener for real-time validation
-        phoneInput.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                String phoneNumber = s.toString();
-                // Remove all emoji flags first (any character in the emoji range)
-                phoneNumber = phoneNumber.replaceAll("[\uD83C\uDDE6-\uD83C\uDDFF]{2}\\s*", "");
-                
-                if (validatePhoneNumber(phoneNumber)) {
-                    try {
-                        Phonenumber.PhoneNumber number = phoneNumberUtil.parse(phoneNumber, null);
-                        String regionCode = phoneNumberUtil.getRegionCodeForNumber(number);
-                        if (regionCode != null) {
-                            String flag = CountryUtils.getCountryFlag(regionCode);
-                            // Only update if the number is valid
-                            phoneInput.removeTextChangedListener(this);
-                            phoneInput.setText(flag + " " + phoneNumber);
-                            phoneInput.setSelection(phoneInput.length());
-                            phoneInput.addTextChangedListener(this);
-                        }
-                    } catch (NumberParseException e) {
-                        // Ignore parsing errors while typing
-                    }
-                }
             }
         });
     }

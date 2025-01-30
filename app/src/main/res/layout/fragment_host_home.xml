@@ -137,20 +137,23 @@
                 android:inputType="textPostalAddress"/>
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- 5. Phone Section -->
+        <!-- Phone Input Section -->
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/phoneInputLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="24dp"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+            android:layout_marginBottom="16dp"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            app:helperText="e.g. 912345678"
+            app:helperTextEnabled="true"
+            app:helperTextTextColor="@android:color/darker_gray">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/phoneInput"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Phone Number"
-                android:inputType="phone"/>
+                android:inputType="phone"
+                android:hint="Phone Number"/>
         </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Save Button at the bottom -->
