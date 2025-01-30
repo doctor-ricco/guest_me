@@ -151,6 +151,12 @@ public class VisitorHomeFragment extends Fragment {
         String country = countrySpinner.getText().toString();
         String city = citySpinner.getText().toString();
 
+        // Check if photo was uploaded
+        if (uploadedImageUrl == null) {
+            Toast.makeText(getActivity(), "Please upload a profile photo", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         if (fullName.isEmpty() || phone.isEmpty() || description.isEmpty() || 
             country.isEmpty() || city.isEmpty() || address.isEmpty()) {
             Toast.makeText(getActivity(), "Please fill in all fields", Toast.LENGTH_SHORT).show();
@@ -168,18 +174,19 @@ public class VisitorHomeFragment extends Fragment {
         profileData.put("description", description);
         profileData.put("country", country);
         profileData.put("city", city);
-        if (uploadedImageUrl != null) {
-            profileData.put("photoUrl", uploadedImageUrl);
-        }
+        profileData.put("photoUrl", uploadedImageUrl);
+        profileData.put("type", "Visitor");
+        profileData.put("profileComplete", true);
 
         firestore.collection("users")
                 .document(userId)
                 .set(profileData, SetOptions.merge())
                 .addOnSuccessListener(aVoid -> {
                     Toast.makeText(getActivity(), "Profile updated successfully!", Toast.LENGTH_SHORT).show();
-                    isProfileComplete = true;
-
-                    Intent intent = new Intent(getActivity(), VisitorProfileActivity.class);
+                    
+                    // Navigate to preferences
+                    Intent intent = new Intent(getActivity(), PreferencesActivity.class);
+                    intent.putExtra("isNewUser", !isEditing);
                     startActivity(intent);
                     getActivity().finish();
                 })

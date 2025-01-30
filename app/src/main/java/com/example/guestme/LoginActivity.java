@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -21,6 +22,7 @@ public class LoginActivity extends AppCompatActivity {
         EditText emailInput = findViewById(R.id.emailInput);
         EditText passwordInput = findViewById(R.id.passwordInput);
         Button loginButton = findViewById(R.id.loginButton);
+        TextView createAccountLink = findViewById(R.id.createAccountLink);
 
         loginButton.setOnClickListener(view -> {
             String email = emailInput.getText().toString();
@@ -57,8 +59,7 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
-        Button registerButton = findViewById(R.id.registerButton);
-        registerButton.setOnClickListener(view -> {
+        createAccountLink.setOnClickListener(view -> {
             Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
             startActivity(intent);
         });

@@ -72,29 +72,38 @@ public class PreferencesActivity extends AppCompatActivity {
                 if (task.isSuccessful() && task.getResult() != null && task.getResult().exists()) {
                     // Documento existe, atualizar preferências
                     userDocRef.update("preferences", preferences)
-                            .addOnSuccessListener(aVoid -> navigateToProfile())
+                            .addOnSuccessListener(aVoid -> {
+                                Toast.makeText(this, "Preferences saved successfully!", Toast.LENGTH_SHORT).show();
+                                
+                                // Always navigate to VisitorProfileActivity
+                                Intent intent = new Intent(this, VisitorProfileActivity.class);
+                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                startActivity(intent);
+                                finish();
+                            })
                             .addOnFailureListener(e -> {
-                                Toast.makeText(this, "Failed to save preferences: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                                Log.e("PreferencesActivity", "Error updating preferences", e);
+                                Toast.makeText(this, "Error saving preferences: " + e.getMessage(), 
+                                    Toast.LENGTH_SHORT).show();
                             });
                 } else {
                     // Documento não existe, criar novo documento
                     userDocRef.set(new UserPreferences(preferences))
-                            .addOnSuccessListener(aVoid -> navigateToProfile())
+                            .addOnSuccessListener(aVoid -> {
+                                Toast.makeText(this, "Preferences saved successfully!", Toast.LENGTH_SHORT).show();
+                                
+                                // Always navigate to VisitorProfileActivity
+                                Intent intent = new Intent(this, VisitorProfileActivity.class);
+                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                startActivity(intent);
+                                finish();
+                            })
                             .addOnFailureListener(e -> {
-                                Toast.makeText(this, "Failed to create preferences: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                                Log.e("PreferencesActivity", "Error creating preferences", e);
+                                Toast.makeText(this, "Error saving preferences: " + e.getMessage(), 
+                                    Toast.LENGTH_SHORT).show();
                             });
                 }
             });
         });
-    }
-
-    private void navigateToProfile() {
-        // Navegar para a tela de perfil e finalizar todas as telas anteriores
-        Intent intent = new Intent(PreferencesActivity.this, HostProfileActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK); // Limpar stack de atividades
-        startActivity(intent);
     }
 
     // Classe auxiliar para salvar preferências no Firestore

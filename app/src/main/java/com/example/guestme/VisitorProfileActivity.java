@@ -2,6 +2,7 @@ package com.example.guestme;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -41,6 +42,7 @@ public class VisitorProfileActivity extends AppCompatActivity {
         Button editProfileButton = findViewById(R.id.editProfileButton);
         Button logoutButton = findViewById(R.id.logoutButton);
         Button findHostButton = findViewById(R.id.findHostButton);
+        Button editPreferencesButton = findViewById(R.id.editPreferencesButton);
 
         auth = FirebaseAuth.getInstance();
         firestore = FirebaseFirestore.getInstance();
@@ -74,6 +76,11 @@ public class VisitorProfileActivity extends AppCompatActivity {
             Intent intent = new Intent(this, FindHostActivity.class);
             startActivity(intent);
         });
+
+        editPreferencesButton.setOnClickListener(v -> {
+            Intent intent = new Intent(this, PreferencesActivity.class);
+            startActivity(intent);
+        });
     }
 
     private void loadProfileData(String userId, CircleImageView profileImage, 
@@ -87,6 +94,12 @@ public class VisitorProfileActivity extends AppCompatActivity {
                     if (document.exists()) {
                         updateUI(document, profileImage, fullNameText, descriptionText, 
                             preferencesText, locationText, phoneText);
+                        
+                        // Always show all buttons
+                        findViewById(R.id.editProfileButton).setVisibility(View.VISIBLE);
+                        findViewById(R.id.editPreferencesButton).setVisibility(View.VISIBLE);
+                        findViewById(R.id.findHostButton).setVisibility(View.VISIBLE);
+                        findViewById(R.id.logoutButton).setVisibility(View.VISIBLE);
                     }
                 })
                 .addOnFailureListener(e -> 
@@ -138,6 +151,22 @@ public class VisitorProfileActivity extends AppCompatActivity {
             }
         } catch (NumberParseException e) {
             phoneText.setText(phone);
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Refresh profile data when returning to this activity
+        String userId = auth.getCurrentUser().getUid();
+        if (userId != null) {
+            loadProfileData(userId, 
+                findViewById(R.id.profileImage),
+                findViewById(R.id.fullNameText),
+                findViewById(R.id.descriptionText),
+                findViewById(R.id.preferencesText),
+                findViewById(R.id.locationText),
+                findViewById(R.id.phoneText));
         }
     }
 } 
