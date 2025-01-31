@@ -419,16 +419,18 @@ public class VisitorHomeFragment extends Fragment {
 
     private boolean validatePhoneNumber(String phoneNumber) {
         try {
-            Phonenumber.PhoneNumber number = phoneNumberUtil.parse(phoneNumber, null);
-            if (!phoneNumberUtil.isValidNumber(number)) {
-                Toast.makeText(getActivity(), "Please enter a valid phone number", 
-                    Toast.LENGTH_SHORT).show();
-                return false;
+            // If phone number doesn't start with +, try to add country code
+            if (!phoneNumber.startsWith("+")) {
+                String country = countrySpinner.getText().toString();
+                String countryCode = CountryUtils.getCountryCode(country);
+                if (countryCode != null) {
+                    phoneNumber = countryCode + phoneNumber;
+                }
             }
-            return true;
+            
+            Phonenumber.PhoneNumber number = phoneNumberUtil.parse(phoneNumber, null);
+            return phoneNumberUtil.isValidNumber(number);
         } catch (NumberParseException e) {
-            Toast.makeText(getActivity(), "Please enter a valid phone number", 
-                Toast.LENGTH_SHORT).show();
             return false;
         }
     }

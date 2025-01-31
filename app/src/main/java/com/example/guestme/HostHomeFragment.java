@@ -290,40 +290,40 @@ public class HostHomeFragment extends Fragment {
     }
 
     private void saveProfile() {
-        String fullName = fullNameInput.getText().toString();
-        String address = addressInput.getText().toString();
-        String phone = phoneInput.getText().toString();
-        String description = descriptionInput.getText().toString();
+        String fullName = fullNameInput.getText().toString().trim();
+        String address = addressInput.getText().toString().trim();
+        String description = descriptionInput.getText().toString().trim();
+        String phone = phoneInput.getText().toString().trim();
         String selectedCountry = countrySpinner.getText().toString();
         String selectedCity = citySpinner.getText().toString();
 
-        // Validate all fields
-        if (fullName.isEmpty() || address.isEmpty() || description.isEmpty()) {
-            Toast.makeText(getActivity(), "Please fill out all fields.", Toast.LENGTH_SHORT).show();
+        // Basic validation
+        if (fullName.isEmpty() || address.isEmpty() || phone.isEmpty() || description.isEmpty()) {
+            Toast.makeText(getActivity(), "Please fill in all fields", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Validate country and city
-        if (selectedCountry.isEmpty() || selectedCity.isEmpty()) {
-            Toast.makeText(getActivity(), "Please select both country and city.", Toast.LENGTH_SHORT).show();
+        // Validate country selection
+        if (selectedCountry.isEmpty()) {
+            Toast.makeText(getActivity(), "Please select a country", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Validate phone number
-        if (!phoneFormatter.isValidPhoneNumber()) {
-            Toast.makeText(getActivity(), "Please enter a valid phone number", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        String fullPhoneNumber = phoneFormatter.getFullPhoneNumber();
-
-        // Format the phone number to E.164 format for storage
         try {
-            Phonenumber.PhoneNumber number = phoneNumberUtil.parse(fullPhoneNumber, null);
-            String formattedNumber = phoneNumberUtil.format(number, PhoneNumberUtil.PhoneNumberFormat.E164);
-            saveProfileToFirestore(fullName, address, formattedNumber, description, uploadedImageUrl, selectedCountry, selectedCity);
+            // Format phone number with country code
+            String formattedPhone = CountryUtils.formatPhoneNumber(phone, selectedCountry, phoneNumberUtil);
+            
+            // Validate the formatted number
+            Phonenumber.PhoneNumber parsedNumber = phoneNumberUtil.parse(formattedPhone, null);
+            if (!phoneNumberUtil.isValidNumber(parsedNumber)) {
+                Toast.makeText(getActivity(), "Please enter a valid phone number", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // Save the formatted number
+            saveProfileToFirestore(fullName, address, formattedPhone, description, uploadedImageUrl, selectedCountry, selectedCity);
         } catch (NumberParseException e) {
-            Toast.makeText(getActivity(), "Error formatting phone number.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), "Please enter a valid phone number for " + selectedCountry, Toast.LENGTH_SHORT).show();
         }
     }
 
